@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server.hpp                                         :+:      :+:    :+:   */
+/*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: morgane <morgane@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/11 22:50:22 by morgane          ###   ########.fr       */
+/*   Updated: 2025/06/11 23:19:39 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,17 +29,9 @@
 #include <csignal>
 #include <cerrno>
 #include <sstream>
+#include "Client.hpp"
 
 
-
-class Client {
-    private:
-    int _clientSocket;
-
-    public:
-    Client(int clientSock){_clientSocket = clientSock;};
-    ~Client() {};
-};
 
 class Channel {};
 

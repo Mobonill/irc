@@ -6,17 +6,17 @@
 /*   By: morgane <morgane@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 19:20:10 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/11 16:34:04 by morgane          ###   ########.fr       */
+/*   Updated: 2025/06/11 23:23:00 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "server.hpp"
+#include "Server.hpp"
 
 
 int main(int argc, char **argv) {
     if (argc != 3) {
         std::cerr << "Syntax error: ./ircserv <port> <password>" << std::endl;
-        return 1;
+        return (1);
     }
 
     int port = std::atoi(argv[1]);
@@ -36,8 +36,8 @@ int main(int argc, char **argv) {
     } catch (const std::exception &e) {
         server.closeFds();
         std::cerr << "Error: " << e.what() << std::endl;
-        return 1;
+        return (1);
     }
 
-    return 0;
+    return (0);
 }
