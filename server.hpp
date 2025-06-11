@@ -6,7 +6,7 @@
 /*   By: morgane <morgane@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/11 20:24:32 by morgane          ###   ########.fr       */
+/*   Updated: 2025/06/11 22:50:22 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 #include <fcntl.h>
 #include <csignal>
 #include <cerrno>
+#include <sstream>
 
 
 
@@ -47,6 +48,7 @@ class Server {
     private:
     std::map<int, Client> _clients;
     std::map<std::string, Channel> _channels;
+    std::map<int, std::string> _clientBuffers;
     int _port;
     std::string _password;
     int _socketFd;
@@ -67,8 +69,9 @@ class Server {
     void closeFds();
     void stopSignal();
     void clearClient(int client_fd);
-    
-    
+    void parseMessage(int client_fd, const std::string &msg);
+    void parseAndExecute(int client_fd, std::string line);
+    void handleCommands(int fd, const std::vector<std::string> &vectorCmd);
 };
 
 
