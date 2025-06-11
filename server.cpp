@@ -6,7 +6,7 @@
 /*   By: morgane <morgane@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:17 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/11 19:08:37 by morgane          ###   ########.fr       */
+/*   Updated: 2025/06/11 20:25:18 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,10 +124,19 @@ void Server::socketChecker() {
 
     if (FD_ISSET(_socketFd, &allFds))
         handleNewClient();
+    
+    std::vector<int> clients_to_remove;
 
-    for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); ++it)
-        if (FD_ISSET(it->first, &allFds))
-            handleClientMessage(it->first);
+    for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); ++it) {
+        if (FD_ISSET(it->first, &allFds)) {
+               if (!handleClientMessage(it->first)) {
+                   clients_to_remove.push_back(it->first);
+               }
+           }
+     }
+     for (size_t i = 0; i < clients_to_remove.size(); ++i)
+         clearClient(clients_to_remove[i]);
+            
 }
 
 void Server::handleNewClient() {
@@ -148,32 +157,32 @@ void Server::handleNewClient() {
         }
 }
 
-void Server::handleClientMessage(int client_fd) {
+bool Server::handleClientMessage(int client_fd) {
 
     char buff[40000];
     memset(buff, 0, sizeof(buff));
     
     ssize_t bytes = recv(client_fd, buff, sizeof(buff) -1, 0);
     if (bytes <= 0) {
-        std::cout << "Client " << client_fd << "disconnected" << std::endl;
-        // clearClient(client_fd);
-        close(client_fd);
+        std::cout << "Client " << client_fd << " disconnected" << std::endl;
+        return (false);
     }
     else {
         buff[bytes] = '\0';
-        std::cout << "Client <" << client_fd << "> Data: " << buff
+        std::cout << "Client <" << client_fd << "> Data: " << buff << std::endl;
+        return (true);
     }
     
 }
 
-// void Server::clearClient(int client_fd) {
+void Server::clearClient(int client_fd) {
     
-//     for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); )
-//     {
-//         if (client_fd == it->first) {
-//             close(it->first);
-//             _clients.erase(it++);
-//         }
-//     }
-// }
+    std::map<int, Client>::iterator it = _clients.find(client_fd);
+    if (it != _clients.end()) {
+        close(client_fd);
+        _clients.erase(it);
+        std::cout << "Client <" << client_fd << "> erased" << std::endl;
+    }
+}
+
 

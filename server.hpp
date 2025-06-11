@@ -6,7 +6,7 @@
 /*   By: morgane <morgane@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/11 18:42:00 by morgane          ###   ########.fr       */
+/*   Updated: 2025/06/11 20:24:32 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,10 +62,11 @@ class Server {
     void createServer();
     void socketChecker();
     void handleNewClient();
-    void handleClientMessage(int client_fd);
+    bool handleClientMessage(int client_fd);
     static void handleSignal(int signal);
     void closeFds();
     void stopSignal();
+    void clearClient(int client_fd);
     
     
 };
