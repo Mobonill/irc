@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: morgane <morgane@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mobonill <mobonill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:17 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/12 19:47:03 by morgane          ###   ########.fr       */
+/*   Updated: 2025/06/13 17:06:50 by mobonill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,9 +34,9 @@ bool Server::getSignal() {
 
 void Server::handleSignal(int signal)
 {
-	(void)signal;
-	std::cout << std::endl << "handle signal function worked" << std::endl;
-	if (g_signal)
+  (void)signal;
+  std::cout << std::endl << "handle signal function worked" << std::endl;
+  if (g_signal)
         g_signal->stopSignal();
     else
         std::cerr << "g_signal not initialized!" << std::endl;
@@ -220,73 +220,73 @@ void Server::parseAndExecute(int client_fd, std::string line) {
 }
 
 void Server::handleCommands(int fd, const std::vector<std::string> &vectorCmd) {
-	
+  
     std::string cmd;
-	std::vector<std::string> vectorSpliter;
+  std::vector<std::string> vectorSpliter;
 
-	for (size_t i = 0; i < vectorCmd.size(); i++) {
-		cmd = vectorCmd[i];
-		vectorSpliter = splitString(cmd, " ");
-		if (vectorSpliter.empty())
-			continue;
-		if (vectorSpliter[0] == "PASS") {
-			// checkPass(fd, cmd);
-		}
-		else if (vectorSpliter[0] == "NICK") {
-			// checkNick(fd, cmd);
-		}
-		else if (vectorSpliter[0] == "USER") {
-			// checkUser(fd, cmd);
-		}
-		else if (vectorSpliter[0] == "JOIN") {
-			// checkJoin(fd, cmd);
-		}
+  for (size_t i = 0; i < vectorCmd.size(); i++) {
+    cmd = vectorCmd[i];
+    vectorSpliter = splitString(cmd, " ");
+    if (vectorSpliter.empty())
+      continue;
+    if (vectorSpliter[0] == "PASS") {
+      // checkPass(fd, cmd);
+    }
+    else if (vectorSpliter[0] == "NICK") {
+      // checkNick(fd, cmd);
+    }
+    else if (vectorSpliter[0] == "USER") {
+      // checkUser(fd, cmd);
+    }
+    else if (vectorSpliter[0] == "JOIN") {
+      // checkJoin(fd, cmd);
+    }
         else if (vectorSpliter[0] == "TOPIC") {
-			// checkTopic(fd, cmd);
-		}
+      // checkTopic(fd, cmd);
+    }
         else if (vectorSpliter[0] == "KICK") {
-			// checkKick(fd, cmd);
-		}
+      // checkKick(fd, cmd);
+    }
         else if (vectorSpliter[0] == "MODE") {
-			// checkMode(fd, cmd);
-		}
+      // checkMode(fd, cmd);
+    }
         else if (vectorSpliter[0] == "INFO") {
-			// checkInfo(fd, cmd);
-		}
+      // checkInfo(fd, cmd);
+    }
         else if (vectorSpliter[0] == "INVITE") {
-			// checkInvite(fd, cmd);
-		}
+      // checkInvite(fd, cmd);
+    }
         else if (vectorSpliter[0] == "PRIVMSG") {
-			// checkPrivmsg(fd, cmd);
-		}
+      // checkPrivmsg(fd, cmd);
+    }
         else if (vectorSpliter[0] == "BOT\r") {
-			// checkBot(fd, cmd);
-		}
-		else {
-			std::cout << "-> Unknown command " << fd << " : " << vectorSpliter[0] << std::endl;
-		}
-	}
-}
-
-void Server::checkPass(int client_fd, const std::string &cmd)
-{
-    std::vector<std::string> pass = splitString(cmd, " ");
-
-    if (pass.size() != 2)
-    {
-        sendError(client_fd, "461 PASS :Not enough parameters");
-        return;
+      // checkBot(fd, cmd);
     }
-    if (pass[1] == _password) 
-        std::cout << "Client " << client_fd << " authenticated successfully." << std::endl;
     else {
-        sendError(client_fd, "464 :Password incorrect");
-        clearClient(client_fd);
+      std::cout << "-> Unknown command " << fd << " : " << vectorSpliter[0] << std::endl;
     }
+  }
 }
 
-void Server::sendError(int client_fd, const std::string &errorMsg)
-{
-   // std::string errorMessage = ":" + _serverName + " " + errorMsg + "\r\n";
-    send(client_fd, errorMessage.c_str(), errorMessage.size(), 0);
-}
+// void Server::checkPass(int client_fd, const std::string &cmd)
+// {
+//     std::vector<std::string> pass = splitString(cmd, " ");
+//   (void)client_fd;
+//     if (pass.size() != 2)
+//     {
+//         // sendError(client_fd, "461 PASS :Not enough parameters");
+//         return;
+//     }
+//     if (pass[1] == _password) 
+//         std::cout << "Client " << client_fd << " authenticated successfully." << std::endl;
+//     else {
+//         // sendError(client_fd, "464 :Password incorrect");
+//         clearClient(client_fd);
+//     }
+// }
+
+// void Server::sendError(int client_fd, const std::string &errorMsg)
+// {
+//    // std::string errorMessage = ":" + _serverName + " " + errorMsg + "\r\n";
+//     send(client_fd, errorMessage.c_str(), errorMessage.size(), 0);
+// }
