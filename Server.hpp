@@ -6,7 +6,7 @@
 /*   By: morgane <morgane@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/11 23:19:39 by morgane          ###   ########.fr       */
+/*   Updated: 2025/06/12 19:44:05 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,10 @@ class Server {
     void parseMessage(int client_fd, const std::string &msg);
     void parseAndExecute(int client_fd, std::string line);
     void handleCommands(int fd, const std::vector<std::string> &vectorCmd);
+    void sendError(int client_fd, const std::string &errorMsg);
+    void checkPass(int client_fd, const std::string &cmd);
+
+    
 };
 
 

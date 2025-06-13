@@ -6,7 +6,7 @@
 /*   By: morgane <morgane@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:17 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/11 23:17:30 by morgane          ###   ########.fr       */
+/*   Updated: 2025/06/12 19:47:03 by morgane          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@ Server::Server(int port, const std::string &password): _port(port), _password(pa
 Server::~Server() {
 
 }
-
 
 
 bool Server::getSignal() {
@@ -269,4 +268,25 @@ void Server::handleCommands(int fd, const std::vector<std::string> &vectorCmd) {
 	}
 }
 
+void Server::checkPass(int client_fd, const std::string &cmd)
+{
+    std::vector<std::string> pass = splitString(cmd, " ");
 
+    if (pass.size() != 2)
+    {
+        sendError(client_fd, "461 PASS :Not enough parameters");
+        return;
+    }
+    if (pass[1] == _password) 
+        std::cout << "Client " << client_fd << " authenticated successfully." << std::endl;
+    else {
+        sendError(client_fd, "464 :Password incorrect");
+        clearClient(client_fd);
+    }
+}
+
+void Server::sendError(int client_fd, const std::string &errorMsg)
+{
+   // std::string errorMessage = ":" + _serverName + " " + errorMsg + "\r\n";
+    send(client_fd, errorMessage.c_str(), errorMessage.size(), 0);
+}
