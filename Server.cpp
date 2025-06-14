@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:17 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/14 16:26:08 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/06/14 20:29:43 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,8 @@ Server::Server(int port, const std::string &password): _port(port), _password(pa
 }
 
 Server::~Server() {}
+
+void	Server::setServerName(const std::string &newName) { _serverName = newName; }
 
 bool Server::getSignal() { return (this->_signal); }
 
@@ -88,6 +90,9 @@ void Server::createServer(void)
 		else
 			std::cout << "Server is listening" << std::endl;
 	}
+	socklen_t len = sizeof(serverAddress);
+	getsockname(_socketFd, (struct sockaddr *)&serverAddress, &len);
+	_serverName = inet_ntoa(serverAddress.sin_addr);
 	if (fcntl(_socketFd, F_SETFL, O_NONBLOCK) < 0)
 		throw std::runtime_error("Failed to set socket non-blocking");
 
@@ -217,6 +222,7 @@ void Server::handleCommands(int fd, const std::vector<std::string> &vectorCmd)
 		if (vectorSpliter[0] == "PASS") //store the password
 		{
 			// checkPass(fd, cmd);
+			checkPass(vectorSpliter, fd);
 		}
 		else if (vectorSpliter[0] == "NICK") //set the nickname
 		{

@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 15:36:07 by lchauffo          #+#    #+#             */
-/*   Updated: 2025/06/14 16:26:14 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/06/14 20:31:25 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,19 +35,47 @@
 //     send(client_fd, errorMessage.c_str(), errorMessage.size(), 0);
 // }
 
-void	checkPass(int fd, std::string cmd)
+//:servername CODE * COMMAND :message
+//:servername → your server name
+// CODE → IRC numeric reply
+// * → the client nickname, if not registered put '*' instead
+// COMMAND → the command being responded to
+// :message → the error message
+
+
+void	Server::sendError(int clientFd, const std::string &code, const std::string &error)
 {
-	if ()
-	//check password policy
-	//:localhost 461 * PASS :Not enough parameters
-	//:localhost 461 * PASS :Too many parameters
-	//:server 464 * :Password incorrect
+	std::string clientName = _clients[clientFd].getNickName();
+	std::string errMessage = ":" + _serverName + " " + code + " " + clientName + " " + error + "\r\n";
+	send(clientFd, errMessage.c_str(), errMessage.size(), 0);
+}
+
+//check password policy
+void	Server::checkPass(std::vector<std::string> pass, int clientFd)
+{
+	if (pass.size() < 2)
+		return sendError(clientFd, "461", "PASS :Not enough parameters");
+	else if (pass.size() < 2)
+		return sendError(clientFd, "461", "PASS :Too many parameters");
+	else if (_clients[clientFd].getAuthenticated() == true)
+		return sendError(clientFd, "462", "PASS :You may not reregister");
+	else if (pass[1].compare(_password) == false)
+		return sendError(clientFd, "464", "PASS :Password incorrect");
+	else
+	{
+		_clients[clientFd].setAuthenticated(true);
+		std::cout << "Client " << clientFd << " authenticated successfully." << std::endl;
+	}
 	return ;
 }
 // if NICK or USER, before PASS == :localhost 464 * :Password required
+// ERR_NONICKNAMEGIVEN             ERR_ERRONEUSNICKNAME
+// ERR_NICKNAMEINUSE               ERR_NICKCOLLISION
+// use to create or modify if one
 void	checkNick(int fd, std::string cmd)
 {}
-
+// input a name to make a guest an actual client
+// ERR_NEEDMOREPARAMS              ERR_ALREADYREGISTRED
 void	checkUser(int fd, std::string cmd)
 {}
 
