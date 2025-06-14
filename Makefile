@@ -5,7 +5,6 @@ SRC =	main.cpp \
 		Server.cpp \
 		Client.cpp \
 
-
 OBJ = $(SRC:.cpp=.o)
 
 all: $(NAME)
@@ -23,3 +22,5 @@ re: fclean all
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
+
+.PHONY: all clean fclean re
