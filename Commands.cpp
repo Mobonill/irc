@@ -6,11 +6,13 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 15:36:07 by lchauffo          #+#    #+#             */
-/*   Updated: 2025/06/14 20:31:25 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/06/16 20:37:28 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "Utils.cpp"
+#include "cctype"
 
 // void Server::checkPass(int client_fd, const std::string &cmd)
 // {
@@ -50,7 +52,6 @@ void	Server::sendError(int clientFd, const std::string &code, const std::string 
 	send(clientFd, errMessage.c_str(), errMessage.size(), 0);
 }
 
-//check password policy
 void	Server::checkPass(std::vector<std::string> pass, int clientFd)
 {
 	if (pass.size() < 2)
@@ -59,25 +60,62 @@ void	Server::checkPass(std::vector<std::string> pass, int clientFd)
 		return sendError(clientFd, "461", "PASS :Too many parameters");
 	else if (_clients[clientFd].getAuthenticated() == true)
 		return sendError(clientFd, "462", "PASS :You may not reregister");
+	// else if (pass[1].size() > 128) //OWASP Authentication Cheat Sheet, can be down to 64 chars
+	// 	return sendError(clientFd, "464", "PASS :Password incorrect");
 	else if (pass[1].compare(_password) == false)
 		return sendError(clientFd, "464", "PASS :Password incorrect");
 	else
 	{
+		if (pass[1].compare(_password) == false)
+			return sendError(clientFd, "464", "PASS :Password incorrect");
 		_clients[clientFd].setAuthenticated(true);
 		std::cout << "Client " << clientFd << " authenticated successfully." << std::endl;
 	}
 	return ;
 }
+// Example:
+
+// NICK Wiz                        ; Introducing new nick "Wiz".
+// :WiZ NICK Kilroy                ; WiZ changed his nickname to Kilroy.
+// [serverName]:oldnick NICK newnick
+void	Server::checkNick(std::string nick, int clientFd)
+{
+	if (nick.empty())
+		return sendError(clientFd, "432", "NICK :Erroneus nickname");
+	else if (_clients[clientFd].getAuthenticated() == false)
+		return sendError(clientFd, "464", "PASS :Password required");//non-standard error, following RFC logics, else can just ignore
+	else if (nick.size() != 2)
+		return sendError(clientFd, "431", "NICK :No nickname given");
+	else
+	{
+		if (nick.size() > 9 || (!std::isalpha(nick[0]) && !isValid(nick[0], SPECIAL))
+		|| !onlyValid(&nick[1], ALPHANUMSPE))
+			return sendError(clientFd, "432", "NICK :Erroneus nickname");
+		for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+		{
+			if (it->second.getNickName().compare(nick) == true)
+				return sendError(clientFd, "433", "NICK :Nickname is already in use");
+		}
+		std::string oldNick = _clients[clientFd].getNickName();
+		_clients[clientFd].setNickName(nick);
+		if (oldNick == "*")
+			std::cout << "Introducing new nick \"" << _clients[clientFd].getNickName() << "\"." << std::endl;
+		else
+		{
+			for (std::map<std::string, Channel> ::const_iterator it = _clients[clientFd].getJoinedChannels().begin();
+			it != _clients[clientFd].getJoinedChannels().end(); it++)
+			_clients[clientFd];//get all channels fd in order to printf_fd and announce change nickname
+		}
+	}
+}
 // if NICK or USER, before PASS == :localhost 464 * :Password required
-// ERR_NONICKNAMEGIVEN             ERR_ERRONEUSNICKNAME
-// ERR_NICKNAMEINUSE               ERR_NICKCOLLISION
-// use to create or modify if one
-void	checkNick(int fd, std::string cmd)
-{}
+
 // input a name to make a guest an actual client
 // ERR_NEEDMOREPARAMS              ERR_ALREADYREGISTRED
 void	checkUser(int fd, std::string cmd)
-{}
+{
+	
+}
 
 void	checkJoin(int fd, std::string cmd)
 {}

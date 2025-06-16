@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:17 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/14 20:29:43 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/06/16 14:53:28 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,13 +124,13 @@ void Server::socketChecker()
 
 	for (std::map<int, Client>::iterator it = _clients.begin(); it != _clients.end(); ++it) {
 		if (FD_ISSET(it->first, &allFds)) {
-			   if (!handleClientMessage(it->first)) {
-				   clients_to_remove.push_back(it->first);
-			   }
-		   }
-	 }
-	 for (size_t i = 0; i < clients_to_remove.size(); ++i)
-		 clearClient(clients_to_remove[i]);
+				if (!handleClientMessage(it->first)) {
+					clients_to_remove.push_back(it->first);
+				}
+			}
+	}
+	for (size_t i = 0; i < clients_to_remove.size(); ++i)
+		clearClient(clients_to_remove[i]);
 }
 
 void Server::handleNewClient()

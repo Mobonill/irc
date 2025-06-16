@@ -4,6 +4,8 @@ CFLAGS = -Wall -Wextra -Werror -g -std=c++98
 SRC =	main.cpp \
 		Server.cpp \
 		Client.cpp \
+		Utils.cpp \
+		Commands.cpp
 
 OBJ = $(SRC:.cpp=.o)
 

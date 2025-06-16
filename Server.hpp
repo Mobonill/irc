@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/14 19:08:41 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/06/16 19:19:43 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,9 @@
 #include <vector>
 
 #include "Client.hpp"
+
+#define SPECIAL "[]\\`^{|}"
+#define ALPHANUMSPE "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]\\`^{|}-"
 
 class Channel {};
 
@@ -70,6 +73,7 @@ class Server
 		// void checkPass(int client_fd, const std::string &cmd);
 		void Server::sendError(int clientFd, const std::string &code, const std::string &error);
 		void checkPass(std::vector<std::string> pass, int clientFd);
+		void checkNick(std::string nick, int clientFd);
 };
 
 
