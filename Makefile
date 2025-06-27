@@ -4,6 +4,10 @@ CFLAGS = -Wall -Wextra -Werror -g -std=c++98
 SRC =	main.cpp \
 		Server.cpp \
 		Client.cpp \
+		Channel.cpp \
+		Utils.cpp \
+		ChannelCommands.cpp
+
 
 
 OBJ = $(SRC:.cpp=.o)

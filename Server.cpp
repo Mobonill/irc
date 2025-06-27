@@ -3,15 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mobonill <mobonill@student.42.fr>          +#+  +:+       +#+        */
+/*   By: zserobia <zserobia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:17 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/13 17:06:50 by mobonill         ###   ########.fr       */
+/*   Updated: 2025/06/18 17:10:04 by zserobia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+
+
 #include "Server.hpp"
-#include "Utils.cpp"
+#include "Utils.hpp"
+
+
+
 
 Server* g_signal = NULL;
 
@@ -239,22 +244,22 @@ void Server::handleCommands(int fd, const std::vector<std::string> &vectorCmd) {
       // checkUser(fd, cmd);
     }
     else if (vectorSpliter[0] == "JOIN") {
-      // checkJoin(fd, cmd);
+        checkJoin(fd, cmd);
     }
         else if (vectorSpliter[0] == "TOPIC") {
       // checkTopic(fd, cmd);
     }
-        else if (vectorSpliter[0] == "KICK") {
-      // checkKick(fd, cmd);
+    else if (vectorSpliter[0] == "KICK") {
+        checkKick(fd, cmd);
     }
-        else if (vectorSpliter[0] == "MODE") {
-      // checkMode(fd, cmd);
+    else if (vectorSpliter[0] == "MODE") {
+        checkMode(fd, cmd);
     }
         else if (vectorSpliter[0] == "INFO") {
       // checkInfo(fd, cmd);
     }
-        else if (vectorSpliter[0] == "INVITE") {
-      // checkInvite(fd, cmd);
+    else if (vectorSpliter[0] == "INVITE") {
+        checkInvite(fd, cmd);
     }
         else if (vectorSpliter[0] == "PRIVMSG") {
       // checkPrivmsg(fd, cmd);

@@ -3,27 +3,42 @@
 /*                                                        :::      ::::::::   */
 /*   Utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: morgane <morgane@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zserobia <zserobia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 22:15:02 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/11 23:17:17 by morgane          ###   ########.fr       */
+/*   Updated: 2025/06/18 16:51:29 by zserobia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-std::vector<std::string> splitString(const std::string& str, const char* delimiter) {
-    
-    std::vector<std::string> result;
-    size_t start = 0;
-    size_t end = str.find(delimiter);
+#include "Utils.hpp"
+#include <sstream>
+#include <cstring>
 
-    while (end != std::string::npos) {
-        result.push_back(str.substr(start, end - start));
-        start = end + std::strlen(delimiter);
-        end = str.find(delimiter, start);
+std::vector<std::string> splitString(const std::string &str, const char *delim) {
+    std::vector<std::string> tokens;
+    char *token;
+    char *cstr = strdup(str.c_str());
+    char *tofree = cstr;
+
+    while ((token = strtok(cstr, delim)) != NULL) {
+        tokens.push_back(std::string(token));
+        cstr = NULL;
     }
-    result.push_back(str.substr(start));
 
-    return result;
+    free(tofree);
+    return tokens;
+}
+
+bool isValid(char c, const std::string &validChars) {
+    return validChars.find(c) != std::string::npos;
+}
+
+bool onlyValid(const std::string &str, const std::string &validChars) {
+    for (size_t i = 0; i < str.size(); ++i) {
+        if (!isValid(str[i], validChars))
+            return false;
+    }
+    return true;
 }

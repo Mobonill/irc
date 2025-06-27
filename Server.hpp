@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mobonill <mobonill@student.42.fr>          +#+  +:+       +#+        */
+/*   By: zserobia <zserobia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/13 17:53:08 by mobonill         ###   ########.fr       */
+/*   Updated: 2025/06/27 11:41:43 by zserobia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@
 
 
 
-class Channel {};
+class Channel;
 
 class Server {
     
@@ -66,8 +66,39 @@ class Server {
 		void handleCommands(int fd, const std::vector<std::string> &vectorCmd);
 		void sendError(int client_fd, const std::string &errorMsg);
 		// void checkPass(int client_fd, const std::string &cmd);
+		    // ❗ Добавь эту строку:
+    bool isAuthenticated(int fd);
 
+    // остальные методы
+   // void checkJoin(int fd, const std::string &cmd);
+    //void checkKick(int fd, const std::string &cmd);
+    void checkInvite(int fd, const std::string &cmd);
+    void checkTopic(int fd, const std::string &cmd);
+
+	int getClientFdByNick(const std::string& nick);
+	
+
+	void checkJoin(int fd, const std::string &cmd);
+	void handleJoinZero(int fd);
+	void handleJoinChannels(int fd, const std::vector<std::string> &tokens);
+	Channel& getOrCreateChannel(const std::string &channelName, int fd);
+	void handleSingleChannelJoin(int fd, Client &client, const std::string &channelName, const std::string &providedKey);
+	void sendJoinMessages(int fd, Client &client, Channel &channel);
+
+	void checkKick(int fd, const std::string &cmd);
+	Channel* getChannelOrSendError(int fd, const std::string& channelName);
+    int findClientFdByNick(const std::string& nick) const;
+    Client* getClientOrSendError(int fd);
+    void executeKick(Channel& channel, Client& kicker, int targetFd, const std::string& targetNick, const std::string& channelName);
     
+
+	void checkMode(int fd, const std::string &cmd);
+    bool processModeChange(int fd, const std::vector<std::string> &tokens, Channel &channel, Client &client, const std::string &target);
+    void sendCurrentModes(int fd, Client &client, Channel &channel, const std::string &target);
+	bool isValidChannelName1(const std::string& channelName);
+
+	void handlePrivmsg(int senderFd, const std::vector<std::string>& tokens);
+	
 };
 
 
