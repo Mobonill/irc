@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 23:15:57 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/16 20:21:54 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/06/26 15:49:34 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,26 +16,45 @@
 
 class Channel;
 
+enum stateMachine
+{
+	NOT_AUTHENTCATD,
+	NOT_REGISTRD,
+	REGISTRD,
+	IN_CHANNEL
+};
+
 class Client
 {	
 	private:
 		int _clientSocket;
 		std::string	_nickname;
 		std::string	_username;
-		bool _authenticated;//if authenticated no more check pass
+		std::string	_ip;
+		bool _authenticated;
 		std::map<std::string, Channel> _joinedChannels;
 		std::string	_buffer;
-		std::string	_providedPassword;
-		//std::string ipAddress;?? do i need it and where, if yes, do i need setter?
-
+		int	_status;
+		
+		//BOT related info
+		std::string login;
+		bool hasLogin; // i think it is useless, login.empty()
+		int state; //from 0 to 7 stages of tarot conv...not sure about that
+		std::vector<int> cards; // the 3 drawn numbered cards
+		time_t startTime;
 	public:
 		Client(int clientSock);
 		~Client();
 		int getClientSocket() const;
 		const std::string &getNickName() const;
+		const std::string &getUserName() const;
+		const std::string &getIp() const;
 		const bool &getAuthenticated() const;
 		const std::map<std::string, Channel> &getJoinedChannels() const;
+		const int &getStatus() const;
 
 		void setAuthenticated(const bool &status);
 		void setNickName(const std::string &newNickName);
+		void setUserName(const std::string &newUserName);
+		void setIp(const std::string &ip);
 };

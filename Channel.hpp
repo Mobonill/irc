@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <map>
-#include <vector>
+#include <set>
 
 #include "Client.hpp"
 
@@ -19,13 +19,14 @@ class Channel
 		int _userLimits;
 		std::string _topic;
 		std::string _password;
-		// std::map<Client, std::string> _ClientPriviledge;
 		std::map <int, std::string> _clientPriviledge;
-		std::vector <Client> _listClients;
+		std::set <Client> _listClients;
 	public:
 		Channel(const std::string &channelName);
 		~Channel();
-		const std::vector <Client> &getListClients() const;
+		const std::string &getChannelName() const;
+		const std::set <Client> &getListClients() const;
 		const std::map <int, std::string> &getAllClientPriviledge() const; // see if needed
-		const Client &getClientPriviledge(int clientFd) const;
+		const std::string &getClientPriviledge(int clientFd) const;
+		void addClient(Client *client);
 };

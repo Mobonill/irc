@@ -5,7 +5,8 @@ SRC =	main.cpp \
 		Server.cpp \
 		Client.cpp \
 		Utils.cpp \
-		Commands.cpp
+		Commands.cpp \
+		Channel.cpp
 
 OBJ = $(SRC:.cpp=.o)
 

@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:17 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/16 14:53:28 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/06/26 19:20:56 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@ Server::Server(int port, const std::string &password): _port(port), _password(pa
 Server::~Server() {}
 
 void	Server::setServerName(const std::string &newName) { _serverName = newName; }
+
+const std::map<std::string, Channel> &Server::getChannels() const { return _channels; }
 
 bool Server::getSignal() { return (this->_signal); }
 
@@ -149,6 +151,7 @@ void Server::handleNewClient()
 		_clients.insert(std::make_pair(clientSocket, Client(clientSocket)));
 		if (clientSocket > _clientsNumber)
 			_clientsNumber = clientSocket;
+		_clients[clientSocket].setIp = inet_ntoa(client_addr.sin_addr);
 	}
 }
 
@@ -209,59 +212,60 @@ void Server::parseAndExecute(int client_fd, std::string line)
 	handleCommands(client_fd, cmds);
 }
 
-void Server::handleCommands(int fd, const std::vector<std::string> &vectorCmd)
+// PASS NICK USER JOIN TOPIC KICK MODE INFO INVITE PRIVMSG BOT
+void Server::parseCommands(int fd, const std::vector<std::string> &vectorCmd)
 {
 	std::string cmd;
 	std::vector<std::string> vectorSpliter;
-
+	std::string cmdsArray[] = { "PASS","NICK","USER","JOIN","TOPIC","KICK","MODE","INFO","INVITE","PRIVMSG","BOT"};
+	std::set<std::string> cmdsCatalog(cmdsArray, cmdsArray + sizeof(cmdsArray) / sizeof(std::string));
 	for (size_t i = 0; i < vectorCmd.size(); i++) {
 		cmd = vectorCmd[i];
 		vectorSpliter = splitString(cmd, " ");
 		if (vectorSpliter.empty())
 			continue;
-		if (vectorSpliter[0] == "PASS") //store the password
-		{
-			// checkPass(fd, cmd);
-			checkPass(vectorSpliter, fd);
-		}
-		else if (vectorSpliter[0] == "NICK") //set the nickname
-		{
-			// checkNick(fd, cmd);
-		}
-		else if (vectorSpliter[0] == "USER") //register user info
-		{
-			// checkUser(fd, cmd);
-		}
-		else if (vectorSpliter[0] == "JOIN") //demand access to a room(or create a new room and join it)
-		{
-			// checkJoin(fd, cmd);
-		}
-		else if (vectorSpliter[0] == "TOPIC") {
-			// checkTopic(fd, cmd);
-		}
-		else if (vectorSpliter[0] == "KICK") {
-			// checkKick(fd, cmd);
-		}
-		else if (vectorSpliter[0] == "MODE") {
-			// checkMode(fd, cmd);
-		}
-		else if (vectorSpliter[0] == "INFO") {
-			// checkInfo(fd, cmd);
-		}
-		else if (vectorSpliter[0] == "INVITE") {
-			// checkInvite(fd, cmd);
-		}
-		else if (vectorSpliter[0] == "PRIVMSG") //target a specific channel(room) and send a message to all other clients
-		{
-			// checkPrivmsg(fd, cmd);
-		}
-		else if (vectorSpliter[0] == "BOT\r") {
-			// checkBot(fd, cmd);
-		}
-		else {
-			std::cout << "-> Unknown command " << fd << " : " << vectorSpliter[0] << std::endl;
-		}
+		else if (cmdsCatalog.find(vectorSpliter[0]) != cmdsCatalog.end())
+			handleCommands(fd, vectorSpliter);
+		else
+			sendServerMessage(fd, "421", vectorSpliter[0] + " :Unknown command");
 	}
 }
 
-
+void Server::handleCommands(int fd, const std::vector<std::string> &command)
+{
+	int status = _clients[fd].getStatus();
+	if (status >= NOT_AUTHENTCATD && command[0] == "PASS") //store the password
+		checkPass(command, fd);
+	else if (status >= NOT_REGISTRD && command[0] == "NICK") //set the nickname
+		checkNick(command, fd);
+	else if (status >= NOT_REGISTRD && command[0] == "USER") //register user info
+	{
+		// checkUser(fd, cmd);
+	}
+	else if (status >= REGISTRD && command[0] == "JOIN") //demand access to a room(or create a new room and join it)
+	{
+		// checkJoin(fd, cmd);
+	}
+	else if (status >= REGISTRD && command[0] == "INFO") // Lulu
+		checkInfo(command, fd);
+	else if (status >= IN_CHANNEL && command[0] == "TOPIC") {
+		// checkTopic(fd, cmd);
+	}
+	else if (status >= IN_CHANNEL && command[0] == "KICK") {
+		// checkKick(fd, cmd);
+	}
+	else if (status >= IN_CHANNEL && command[0] == "MODE") {
+		// checkMode(fd, cmd);
+	}
+	else if (status >= IN_CHANNEL && command[0] == "INVITE") {
+		// checkInvite(fd, cmd);
+	}
+	else if (status >= IN_CHANNEL && command[0] == "PRIVMSG") // Lulu //target a specific channel(room) and send a message to all other clients
+	{
+		checkPrivmsg(command, fd);
+	}
+	else if (status >= IN_CHANNEL && command[0] == "BOT\r") // Lulu
+		checkBot(command, fd);
+	else
+		sendServerMessage(fd, "451", ":You have not registered");
+}

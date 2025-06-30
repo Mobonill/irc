@@ -6,20 +6,23 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/16 19:19:43 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/06/26 19:21:13 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include <arpa/inet.h>
+#include <cctype>
 #include <cerrno>
+#include <cmath>
 #include <csignal>
 #include <cstring>
 #include <fcntl.h>
 #include <iostream>
 #include <map>
 #include <netinet/in.h>
+#include <set>
 #include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,11 +34,12 @@
 #include <vector>
 
 #include "Client.hpp"
+#include "Channel.hpp"
 
 #define SPECIAL "[]\\`^{|}"
 #define ALPHANUMSPE "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]\\`^{|}-"
 
-class Channel {};
+class Channel;
 
 class Server
 {
@@ -54,7 +58,8 @@ class Server
 	public:
 		Server(int port, const std::string &password);
 		~Server();
-		void	setServerName(const std::string &newName);
+		void setServerName(const std::string &newName);
+		const std::map<std::string, Channel> &getChannels() const;
 		
 		bool getSignal();
 		void initServer();
@@ -68,13 +73,24 @@ class Server
 		void clearClient(int client_fd);
 		void parseMessage(int client_fd, const std::string &msg);
 		void parseAndExecute(int client_fd, std::string line);
+		void parseCommands(int fd, const std::vector<std::string> &vectorCmd);
 		void handleCommands(int fd, const std::vector<std::string> &vectorCmd);
-		// void sendError(int client_fd, const std::string &errorMsg);
-		// void checkPass(int client_fd, const std::string &cmd);
-		void Server::sendError(int clientFd, const std::string &code, const std::string &error);
-		void checkPass(std::vector<std::string> pass, int clientFd);
-		void checkNick(std::string nick, int clientFd);
-};
 
+		void sendServerMessage(int clientFd, const std::string &code, const std::string &error);
+		void checkPass(std::vector<std::string> pass, int clientFd);
+		void checkNick(std::vector<std::string> nick, int clientFd);
+		void checkInfo(std::vector<std::string> info, int clientFd);
+		void checkPrivmsg(std::vector<std::string> priv, int clientFd);
+		void checkBot(std::vector<std::string> bot, int clientFd);
+
+		template <typename T>
+		const std::string &toString(T numericalValue)
+		{
+			std::ostringstream oss;
+			oss << numericalValue;
+			return oss.str();
+		}
+		
+};
 
 extern Server* g_signal;
