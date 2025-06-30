@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 19:54:19 by lchauffo          #+#    #+#             */
-/*   Updated: 2025/06/27 16:55:33 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/06/30 17:31:09 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,37 +75,34 @@ bool	wildcardMatch(const std::string &str, const std::string &pattern)
 	return p==pattern.size();
 }
 
-std::string	rebuildMessage(const std::vector<std::string> &msg)
+const std::string	rebuildMessage(const std::vector<std::string> &splitMsg)
 {
 	std::string	msg;
-	std::string	word;
-	int size = msg.size();
-	int wordSize = 0;
+	size_t wordSize = 0;
+    size_t breaklinePos = std::string::npos;
 
-	for (size_t i = 2; i < size; ++i)
+	std::vector<std::string>::const_iterator word;
+	for (word = splitMsg.begin(); word != splitMsg.end(); ++word)
+		if ((*word)[0] == ':')
+			break;
+	for (;word != splitMsg.end(); ++word)
 	{
-		const std::string &tmp = msg[i];
-		size_t breaklinePos = tmp.find("\r\n");
+		breaklinePos = word->find("\r\n");
 		if (breaklinePos == std::string::npos)
-			wordSize = tmp.size();
+			wordSize = word->size();
 		else
 			wordSize = breaklinePos;
 		for (size_t st = 0; st < wordSize; ++st)
 		{
-			char c = tmp[st];
-			if (std::isprint(static_cast<unsigned char>(c)) == true)
-				word += c;
+			char c = (*word)[st];
+			if (std::isprint(static_cast<unsigned char>(c)) != 0)
+				msg += c;
 			else if (c == '\t')
-				word += ' ';
+				msg += ' ';
 		}
 		if (breaklinePos != std::string::npos)
-		{
-			msg += word.substr(0, breaklinePos);
 			break ;
-		}
-		else
-			msg += word;
-		if (i + 1 < size)
+		if ((word + 1) != splitMsg.end())
 			msg += " ";
 	}
 	return msg;
