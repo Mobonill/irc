@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:17 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/26 19:20:56 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/07 18:15:38 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,21 @@ Server::Server(int port, const std::string &password): _port(port), _password(pa
 {
 	_clientsNumber = 0;
 	_signal = false;
+	loadOAuthConfig();
+}
+
+void	loadOAuthConfig()
+{
+	std::string apiConfig = "";
+	std:: ifstream file(apiConfig.c_str());
+	if (!file)
+	{
+		std::cerr << "Cannot open config file: " << filename << std::endl;
+		exit(1);
+	}
+	std::getline(file, _clientId);
+	std::getline(file, _clientSecret);
+	std::getline(file, _redirectUri);
 }
 
 Server::~Server() {}

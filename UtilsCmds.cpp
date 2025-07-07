@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 19:54:19 by lchauffo          #+#    #+#             */
-/*   Updated: 2025/06/30 17:31:09 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/03 13:44:33 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ const std::string &colorWrap(const std::string &colorcode, const std::string &ms
 
 const std::string &botMsg(const std::string &clientNick, const std::string &msg)
 {
-	std::string fullMsg = ":" + " \x03D-CODER!BOT\x0F@localhost" + " \x02PRIVMSG\x0F " + clientNick + " :" + msg + "\r\n";
+	std::string fullMsg = ":" + " \x03D D-CODER!BOT\x0F@localhost" + " \x02PRIVMSG\x0F " + clientNick + " :" + msg + botEnd;
 	return fullMsg;
 }
 

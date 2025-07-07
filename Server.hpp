@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/26 19:21:13 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/07 18:04:13 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <cmath>
 #include <csignal>
 #include <cstring>
+#include <ctime>
 #include <fcntl.h>
 #include <iostream>
 #include <map>
@@ -35,6 +36,7 @@
 
 #include "Client.hpp"
 #include "Channel.hpp"
+#include "Bot.hpp"
 
 #define SPECIAL "[]\\`^{|}"
 #define ALPHANUMSPE "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]\\`^{|}-"
@@ -54,6 +56,10 @@ class Server
 		int _clientsNumber;
 		int _max_fd;
 		std::string _serverName;
+
+		std::string _clientId;//nothing shall be kept directly on the code
+		std::string _clientSecret;//same here, basic security
+		std::string _redirectURI;// to see what i do there
 	
 	public:
 		Server(int port, const std::string &password);
