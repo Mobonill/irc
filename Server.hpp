@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/07 18:04:13 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/09 20:50:18 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,11 @@
 
 class Channel;
 
+#ifndef BONUS
+# define BONUS 0
+ class Bot;
+#endif
+// Parameters: <username> <hostname> <servername> <realname>
 class Server
 {
 	private:
@@ -56,17 +61,24 @@ class Server
 		int _clientsNumber;
 		int _max_fd;
 		std::string _serverName;
+		#ifndef BONUS
+		 Bot bot;
+		#endif
 
-		std::string _clientId;//nothing shall be kept directly on the code
-		std::string _clientSecret;//same here, basic security
-		std::string _redirectURI;// to see what i do there
-	
+		void privToChannel(std::vector<std::string> priv, int clientFd, std::map<std::string, Channel> serverChannels, std::map<int, Client> serverClients);
+		void privToClient(std::vector<std::string> priv, int clientFd, std::map<int, Client> serverClients);
+
+		void bot0(std::vector<std::string> bot, const std::string &name, const int &clientFd);
+		void bot1(std::vector<std::string> bot, const std::string &name, const int &clientFd);
+		void bot2(std::vector<std::string> bot, const std::string &name, const int &clientFd);
+		void bot3(std::vector<std::string> bot, const std::string &name, const int &clientFd);
+		void bot4(std::vector<std::string> bot, const std::string &name, const int &clientFd);
 	public:
 		Server(int port, const std::string &password);
 		~Server();
 		void setServerName(const std::string &newName);
 		const std::map<std::string, Channel> &getChannels() const;
-		
+
 		bool getSignal();
 		void initServer();
 		void createServer();
@@ -83,14 +95,20 @@ class Server
 		void handleCommands(int fd, const std::vector<std::string> &vectorCmd);
 
 		void sendServerMessage(int clientFd, const std::string &code, const std::string &error);
+
+		void checkPass(int clientFd);
+
 		void checkPass(std::vector<std::string> pass, int clientFd);
 		void checkNick(std::vector<std::string> nick, int clientFd);
+
+		void checkUser(std::vector<std::string> user, int fd);
+
 		void checkInfo(std::vector<std::string> info, int clientFd);
 		void checkPrivmsg(std::vector<std::string> priv, int clientFd);
 		void checkBot(std::vector<std::string> bot, int clientFd);
 
 		template <typename T>
-		const std::string &toString(T numericalValue)
+		std::string toString(T numericalValue)
 		{
 			std::ostringstream oss;
 			oss << numericalValue;

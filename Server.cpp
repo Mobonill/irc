@@ -6,13 +6,12 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:17 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/07 18:15:38 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/09 20:49:47 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
-#include "Utils.cpp"
-#include "Commands.cpp"
+#include "Utils.hpp"
 
 Server* g_signal = NULL;
 
@@ -20,21 +19,6 @@ Server::Server(int port, const std::string &password): _port(port), _password(pa
 {
 	_clientsNumber = 0;
 	_signal = false;
-	loadOAuthConfig();
-}
-
-void	loadOAuthConfig()
-{
-	std::string apiConfig = "";
-	std:: ifstream file(apiConfig.c_str());
-	if (!file)
-	{
-		std::cerr << "Cannot open config file: " << filename << std::endl;
-		exit(1);
-	}
-	std::getline(file, _clientId);
-	std::getline(file, _clientSecret);
-	std::getline(file, _redirectUri);
 }
 
 Server::~Server() {}
@@ -166,7 +150,7 @@ void Server::handleNewClient()
 		_clients.insert(std::make_pair(clientSocket, Client(clientSocket)));
 		if (clientSocket > _clientsNumber)
 			_clientsNumber = clientSocket;
-		_clients[clientSocket].setIp = inet_ntoa(client_addr.sin_addr);
+		// _clients[clientSocket].setIp(inet_ntoa(client_addr.sin_addr));
 	}
 }
 
@@ -249,37 +233,37 @@ void Server::parseCommands(int fd, const std::vector<std::string> &vectorCmd)
 void Server::handleCommands(int fd, const std::vector<std::string> &command)
 {
 	int status = _clients[fd].getStatus();
-	if (status >= NOT_AUTHENTCATD && command[0] == "PASS") //store the password
+	if (command[0] == "STATUS")
+		checkPass(fd);
+	else if (status >= NOT_AUTHENTCATD && command[0] == "PASS") //store the password
 		checkPass(command, fd);
 	else if (status >= NOT_REGISTRD && command[0] == "NICK") //set the nickname
 		checkNick(command, fd);
 	else if (status >= NOT_REGISTRD && command[0] == "USER") //register user info
-	{
-		// checkUser(fd, cmd);
-	}
-	else if (status >= REGISTRD && command[0] == "JOIN") //demand access to a room(or create a new room and join it)
-	{
-		// checkJoin(fd, cmd);
-	}
-	else if (status >= REGISTRD && command[0] == "INFO") // Lulu
-		checkInfo(command, fd);
-	else if (status >= IN_CHANNEL && command[0] == "TOPIC") {
-		// checkTopic(fd, cmd);
-	}
-	else if (status >= IN_CHANNEL && command[0] == "KICK") {
-		// checkKick(fd, cmd);
-	}
-	else if (status >= IN_CHANNEL && command[0] == "MODE") {
-		// checkMode(fd, cmd);
-	}
-	else if (status >= IN_CHANNEL && command[0] == "INVITE") {
-		// checkInvite(fd, cmd);
-	}
+		checkUser(command, fd);
+	// else if (status >= REGISTRD && command[0] == "JOIN") //demand access to a room(or create a new room and join it)
+	// {
+	// 	// checkJoin(fd, cmd);
+	// }
+	// else if (status >= REGISTRD && command[0] == "INFO") // Lulu
+	// 	checkInfo(command, fd);
+	// else if (status >= IN_CHANNEL && command[0] == "TOPIC") {
+	// 	// checkTopic(fd, cmd);
+	// }
+	// else if (status >= IN_CHANNEL && command[0] == "KICK") {
+	// 	// checkKick(fd, cmd);
+	// }
+	// else if (status >= IN_CHANNEL && command[0] == "MODE") {
+	// 	// checkMode(fd, cmd);
+	// }
+	// else if (status >= IN_CHANNEL && command[0] == "INVITE") {
+	// 	// checkInvite(fd, cmd);
+	// }
 	else if (status >= IN_CHANNEL && command[0] == "PRIVMSG") // Lulu //target a specific channel(room) and send a message to all other clients
 	{
 		checkPrivmsg(command, fd);
 	}
-	else if (status >= IN_CHANNEL && command[0] == "BOT\r") // Lulu
+	else if (status >= REGISTRD && command[0] == "BOT\r") // Lulu
 		checkBot(command, fd);
 	else
 		sendServerMessage(fd, "451", ":You have not registered");

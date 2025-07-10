@@ -1,19 +1,32 @@
 NAME = ircserv
 CC = c++
-CFLAGS = -Wall -Wextra -Werror -g -std=c++98
+FLAGS = -Wall -Wextra -Werror -g #-fsanitize=address
+F98 = -std=c++98
+D_BONUS = -DBONUS=1
+L_BONUS = 
 SRC =	main.cpp \
 		Server.cpp \
 		Client.cpp \
-		Utils.cpp \
+		Channel.cpp \
 		Commands.cpp \
-		Channel.cpp
+		Utils.cpp \
+		UtilsCmds.cpp \
+		Bot.cpp
 
 OBJ = $(SRC:.cpp=.o)
 
-all: $(NAME)
-
 $(NAME): $(OBJ)
-	$(CC) $(CFLAGS) -o $(NAME) $(OBJ)
+	$(CC) $(FLAGS) $(F98) -o $(NAME) $(OBJ) $(L_BONUS)
+
+%.o:%.cpp
+	$(CC) $(FLAGS) $(F98) -I. -c $< -o $@
+
+bonus: FLAGS += $(D_BONUS)
+	L_BONUS += -lcurl
+
+bonus: re
+
+all: $(NAME)
 
 clean:
 	rm -f $(OBJ)
@@ -23,7 +36,4 @@ fclean: clean
 
 re: fclean all
 
-%.o: %.cpp
-	$(CC) $(CFLAGS) -c $< -o $@
-
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re bonus

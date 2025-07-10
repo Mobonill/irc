@@ -6,13 +6,14 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 23:20:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/01 18:11:11 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/10 14:01:59 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client(int clientSock) : _clientSocket(clientSock), _nickname("*"), _status(NOT_AUTHENTCATD) {}
+Client::Client(void) : _clientSocket(0), _nickname("*"), _status(NOT_AUTHENTCATD), _botConvStep(0) {}
+Client::Client(int clientSock) : _clientSocket(clientSock), _nickname("*"), _status(NOT_AUTHENTCATD), _botConvStep(0) {}
 
 Client::~Client() {}
 
@@ -23,6 +24,8 @@ const std::string &Client::getNickName() const { return _nickname; }
 const std::string &Client::getUserName() const { return _username; }
 
 const std::string &Client::getIp() const { return _ip; }
+
+const std::string &Client::getLogin() const { return _login; }
 
 const bool &Client::getAuthenticated() const { return _authenticated; }
 
@@ -38,10 +41,24 @@ void Client::setNickName(const std::string &newNickName) { _nickname = newNickNa
 
 void Client::setUserName(const std::string &newUserName) { _username = newUserName;}
 
+void Client::setServerName(const std::string &newServerName) { _username = newServerName;}
+
+void Client::setHostName(const std::string &newHostName) { _username = newHostName;}
+
+void Client::setRealName(const std::string &newRealName) { _username = newRealName;}
+
 void Client::setIp(const std::string &ip)
 {
     if (_ip.empty())
         _ip = ip;
+    else
+        return ;
+}
+
+void Client::setLogin(const std::string &login)
+{
+    if (_login.empty())
+        _login = login;
     else
         return ;
 }

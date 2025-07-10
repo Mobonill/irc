@@ -6,14 +6,14 @@ Channel::~Channel() {}
 
 const std::string &Channel::getChannelName() const { return _channelName; }
 
-const std::set <Client> &Channel::getListClients() const { return _listClients; }
+const std::set <Client *> &Channel::getListClients() const { return _listClients; }
 
 const std::map <int, std::string> &Channel::getAllClientPriviledge() const { return _clientPriviledge; }
 
-const std::string &Channel::getClientPriviledge(int clientFd) const
+const std::string *Channel::getClientPriviledge(int clientFd) const
 {
 	if (_clientPriviledge.find(clientFd) != _clientPriviledge.end())
-		return _clientPriviledge.at(clientFd);
+		return &_clientPriviledge.at(clientFd);
 	else
 		return NULL;
 }

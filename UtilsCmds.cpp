@@ -6,44 +6,37 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 19:54:19 by lchauffo          #+#    #+#             */
-/*   Updated: 2025/07/03 13:44:33 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/09 19:17:07 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
 void addClientsFd(const Channel &channel, std::set<int> allClientsFd);
-const std::string &privmsgMsg(const Client &client, std::vector<std::string> priv);
+const std::string privmsgMsg(const Client &client, std::vector<std::string> priv);
+const std::string botMsg(const std::string &clientNick, const std::string &msg);
 void sendMsgListClients(std::set<int> listClients, const int &clientFd, const std::string &msg);
 bool	wildcardMatch(const std::string &str, const std::string &pattern);
-std::string	rebuildMessage(const std::vector<std::string> &msg);
+const std::string	rebuildMessage(const std::vector<std::string> &msg);
 
 
 void addClientsFd(const Channel &channel, std::set<int> allClientsFd)
 {
-	for (const std::set<Client>::iterator sit = channel.getListClients().begin();
+	for (std::set<Client *>::const_iterator sit = channel.getListClients().begin();
 	sit != channel.getListClients().end(); ++sit)
-		allClientsFd.insert(sit->getClientSocket());
+		allClientsFd.insert((*sit)->getClientSocket());
 }
 
-const std::string &privmsgMsg(const Client &client, std::vector<std::string> priv)
+const std::string privmsgMsg(const Client &client, std::vector<std::string> priv)
 {
 	std::string clientFullAddress = client.getNickName() + "!" + client.getUserName() + "@" + client.getIp();
-	std::string msg = ":" + clientFullAddress + " PRIVMSG " + priv[1][0] + " " + rebuildMessage(priv);
+	std::string msg = std::string(":") + clientFullAddress + " PRIVMSG " + priv[1][0] + " " + rebuildMessage(priv);
 	return msg;
 }
 
-const std::string &colorWrap(const std::string &colorcode, const std::string &msg)
+const std::string botMsg(const std::string &clientNick, const std::string &msg)
 {
-	// returns a string like \x03XXmsg\x0F
-	// send(fd, "\x0304The Bug whispers... segfault awaits.\x0F\r\n", ...);
-	// ex: "\x02\x0310[TarotBot]\x0F \x0312You drew \x02The Forked Path\x0F"
-
-}
-
-const std::string &botMsg(const std::string &clientNick, const std::string &msg)
-{
-	std::string fullMsg = ":" + " \x03D D-CODER!BOT\x0F@localhost" + " \x02PRIVMSG\x0F " + clientNick + " :" + msg + botEnd;
+	std::string fullMsg = std::string(":") + " \x03D D-CODER!BOT\x0F@localhost" + " \x02PRIVMSG\x0F " + clientNick + " :" + msg + botEnd;
 	return fullMsg;
 }
 
