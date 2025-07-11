@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 23:20:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/10 14:01:59 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/10 15:02:49 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ Client::Client(int clientSock) : _clientSocket(clientSock), _nickname("*"), _sta
 Client::~Client() {}
 
 int Client::getClientSocket() const { return _clientSocket; }
-
+std::string summonExpressions = "divination,tarot,futur,42forecast,DE-CODER,Dcoder,decoder,read me,akinator";
 const std::string &Client::getNickName() const { return _nickname; }
 
 const std::string &Client::getUserName() const { return _username; }
@@ -51,22 +51,22 @@ void Client::setIp(const std::string &ip)
 {
     if (_ip.empty())
         _ip = ip;
-    else
-        return ;
 }
 
-void Client::setLogin(const std::string &login)
+void Client::setLogin(const std::string &newLogin)
 {
     if (_login.empty())
-        _login = login;
-    else
-        return ;
+        _login = newLogin;
 }
 
 void Client::setBotConvStep(const int &updatedStep)
 {
-    if (updatedStep < 0 || updatedStep > 7)
-        return ;
-    else
+    if (updatedStep >= 0 && updatedStep <= 7)
         _botConvStep = updatedStep;
+}
+
+void Client::setStatus(const int &newStatus)
+{
+    if (newStatus >= NOT_AUTHENTCATD && newStatus <= IN_CHANNEL)
+        _status = newStatus;
 }

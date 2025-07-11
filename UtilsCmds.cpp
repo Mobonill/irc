@@ -6,31 +6,43 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 19:54:19 by lchauffo          #+#    #+#             */
-/*   Updated: 2025/07/09 19:17:07 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/11 18:58:23 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-void addClientsFd(const Channel &channel, std::set<int> allClientsFd);
-const std::string privmsgMsg(const Client &client, std::vector<std::string> priv);
-const std::string botMsg(const std::string &clientNick, const std::string &msg);
-void sendMsgListClients(std::set<int> listClients, const int &clientFd, const std::string &msg);
-bool	wildcardMatch(const std::string &str, const std::string &pattern);
-const std::string	rebuildMessage(const std::vector<std::string> &msg);
+const std::string rebuildMessage(const std::vector<std::string> &splitMsg);
 
-
-void addClientsFd(const Channel &channel, std::set<int> allClientsFd)
+void addClientsFd(const Channel &channel, std::set<int> &allClientsFd)
 {
 	for (std::set<Client *>::const_iterator sit = channel.getListClients().begin();
 	sit != channel.getListClients().end(); ++sit)
 		allClientsFd.insert((*sit)->getClientSocket());
 }
 
-const std::string privmsgMsg(const Client &client, std::vector<std::string> priv)
+const std::string Server::privmsgMsg(int clientFd, const std::vector<std::string> &priv, const std::string &target)
 {
-	std::string clientFullAddress = client.getNickName() + "!" + client.getUserName() + "@" + client.getIp();
-	std::string msg = std::string(":") + clientFullAddress + " PRIVMSG " + priv[1][0] + " " + rebuildMessage(priv);
+	std::map<int, Client>::const_iterator foundClient = _clients.find(clientFd);
+	std::cout << "inside privMsg\n";
+	std::string nullStr = "";
+	if (foundClient == _clients.end())
+	{
+		std::cerr << "-- client is empty\n";
+		return nullStr;
+	}
+	Client thisClient = foundClient->second;
+	std::cout << "" << "thisClient.getNickName(): " << thisClient.getNickName() << std::endl;
+	
+	std::cout << "thisClient.getNickName() : " << thisClient.getNickName() << std::endl;
+	std::cout << "thisClient.getUserName()" << thisClient.getUserName() << std::endl;
+	std::cout << "thisClient.getIp()" << thisClient.getIp() << std::endl;
+	std::string clientFullAddress = thisClient.getNickName() + "!" + thisClient.getUserName() + "@" + thisClient.getIp();
+	std::cout << clientFullAddress << std::endl;
+	std::string fullmsg = rebuildMessage(priv);
+	std::cout <<"-- rebuild message: " << fullmsg << std::endl;
+	std::string msg = std::string(":") + clientFullAddress + " PRIVMSG " + target + " " + fullmsg + "\r\n";
+	std::cout << "-- full message: " << msg << std::endl;
 	return msg;
 }
 
@@ -40,11 +52,18 @@ const std::string botMsg(const std::string &clientNick, const std::string &msg)
 	return fullMsg;
 }
 
-void sendMsgListClients(std::set<int> listClients, const int &clientFd, const std::string &msg)
+void Server::sendMsgListClients(const std::vector<std::string> &cmd, const std::set<int> &listClients, int clientFd, std::string msg)
 {
 	for (std::set<int>::iterator fd = listClients.begin(); fd != listClients.end(); ++fd)
-	if (*fd != clientFd)
-		send(*fd, msg.c_str(), msg.size(), 0);
+	{
+		if (msg.empty())
+			msg = privmsgMsg(clientFd, cmd, _clients[*fd].getNickName());
+		if (!msg.empty() && *fd != clientFd)
+		{
+			std::cout << "mesg = " << msg << std::endl;
+			send(*fd, msg.c_str(), msg.size(), 0);
+		}
+	}
 }
 
 // #*com*p*l*ex*

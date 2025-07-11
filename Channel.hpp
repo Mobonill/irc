@@ -29,7 +29,6 @@ class Channel
 		const std::string &getChannelName() const;
 		const std::set <Client *> &getListClients() const;
 		const std::map <int, std::string> &getAllClientPriviledge() const; // see if needed
-		// const std::string &getClientPriviledge(int clientFd) const;
-		const std::string *getClientPriviledge(int clientFd) const;
+		const std::string getClientPriviledge(int clientFd) const;
 		void addClient(Client *client);
 };

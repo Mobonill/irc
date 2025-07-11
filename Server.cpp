@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:17 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/09 20:49:47 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/11 17:38:43 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,9 +91,10 @@ void Server::createServer(void)
 		else
 			std::cout << "Server is listening" << std::endl;
 	}
-	socklen_t len = sizeof(serverAddress);
-	getsockname(_socketFd, (struct sockaddr *)&serverAddress, &len);
-	_serverName = inet_ntoa(serverAddress.sin_addr);
+	// socklen_t len = sizeof(serverAddress);
+	// getsockname(_socketFd, (struct sockaddr *)&serverAddress, &len);
+	// cinet_ntoa(serverAddress.sin_addr);
+	_serverName = "irc.localhost";
 	if (fcntl(_socketFd, F_SETFL, O_NONBLOCK) < 0)
 		throw std::runtime_error("Failed to set socket non-blocking");
 
@@ -150,7 +151,7 @@ void Server::handleNewClient()
 		_clients.insert(std::make_pair(clientSocket, Client(clientSocket)));
 		if (clientSocket > _clientsNumber)
 			_clientsNumber = clientSocket;
-		// _clients[clientSocket].setIp(inet_ntoa(client_addr.sin_addr));
+		_clients[clientSocket].setIp(inet_ntoa(client_addr.sin_addr));
 	}
 }
 
@@ -184,7 +185,6 @@ void Server::clearClient(int client_fd)
 	}
 }
 
-
 void Server::parseMessage(int client_fd, const std::string &msg)
 {
 	_clientBuffers[client_fd] += msg;
@@ -198,45 +198,40 @@ void Server::parseMessage(int client_fd, const std::string &msg)
 		if (!line.empty() && line[line.length() - 1] == '\r')
 			line.erase(line.length() - 1);
 		buffer.erase(0, pos + 1);
-		parseAndExecute(client_fd, line);
+		parseCommands(client_fd, line);
 	}
 }
 
-void Server::parseAndExecute(int client_fd, std::string line)
+void Server::parseCommands(int fd, const std::string &line)
 {
 	if (line.empty())
-		return;
-	std::vector<std::string> cmds;
-	cmds.push_back(line);
-	handleCommands(client_fd, cmds);
-}
-
-// PASS NICK USER JOIN TOPIC KICK MODE INFO INVITE PRIVMSG BOT
-void Server::parseCommands(int fd, const std::vector<std::string> &vectorCmd)
-{
-	std::string cmd;
-	std::vector<std::string> vectorSpliter;
-	std::string cmdsArray[] = { "PASS","NICK","USER","JOIN","TOPIC","KICK","MODE","INFO","INVITE","PRIVMSG","BOT"};
+		return ;
+	std::vector<std::string> split_cmdline = splitString(line, " ");
+	if (split_cmdline.empty())
+		return ;
+	std::string cmdsArray[] = { "STATUS","PASS","NICK","USER","JOIN","TOPIC","KICK","MODE","INFO","INVITE","PRIVMSG","BOT"};
 	std::set<std::string> cmdsCatalog(cmdsArray, cmdsArray + sizeof(cmdsArray) / sizeof(std::string));
-	for (size_t i = 0; i < vectorCmd.size(); i++) {
-		cmd = vectorCmd[i];
-		vectorSpliter = splitString(cmd, " ");
-		if (vectorSpliter.empty())
-			continue;
-		else if (cmdsCatalog.find(vectorSpliter[0]) != cmdsCatalog.end())
-			handleCommands(fd, vectorSpliter);
-		else
-			sendServerMessage(fd, "421", vectorSpliter[0] + " :Unknown command");
-	}
+	if (cmdsCatalog.find(split_cmdline[0]) != cmdsCatalog.end())
+			handleCommands(fd, split_cmdline);
+	else
+		sendServerMessage(fd, "421", split_cmdline[0] + " :Unknown command");
 }
 
 void Server::handleCommands(int fd, const std::vector<std::string> &command)
 {
 	int status = _clients[fd].getStatus();
+	bool authenticated = _clients[fd].getAuthenticated();
+
+	std::cout << "DEBUG: Client " << fd << " - Status: " << status \
+	<< ", Authenticated: " << authenticated \
+	<< ", Command: '" << command[0] << "'" << std::endl;
 	if (command[0] == "STATUS")
-		checkPass(fd);
+		checkStatus(fd);
 	else if (status >= NOT_AUTHENTCATD && command[0] == "PASS") //store the password
+	{
+		std::cout << "DEBUG: Calling checkPass" << std::endl;
 		checkPass(command, fd);
+	}
 	else if (status >= NOT_REGISTRD && command[0] == "NICK") //set the nickname
 		checkNick(command, fd);
 	else if (status >= NOT_REGISTRD && command[0] == "USER") //register user info
@@ -245,8 +240,8 @@ void Server::handleCommands(int fd, const std::vector<std::string> &command)
 	// {
 	// 	// checkJoin(fd, cmd);
 	// }
-	// else if (status >= REGISTRD && command[0] == "INFO") // Lulu
-	// 	checkInfo(command, fd);
+	else if (status >= REGISTRD && command[0] == "INFO") // Lulu
+		checkInfo(command, fd);
 	// else if (status >= IN_CHANNEL && command[0] == "TOPIC") {
 	// 	// checkTopic(fd, cmd);
 	// }
@@ -259,11 +254,11 @@ void Server::handleCommands(int fd, const std::vector<std::string> &command)
 	// else if (status >= IN_CHANNEL && command[0] == "INVITE") {
 	// 	// checkInvite(fd, cmd);
 	// }
-	else if (status >= IN_CHANNEL && command[0] == "PRIVMSG") // Lulu //target a specific channel(room) and send a message to all other clients
+	else if (status >= REGISTRD && command[0] == "PRIVMSG") // Lulu //target a specific channel(room) and send a message to all other clients
 	{
 		checkPrivmsg(command, fd);
 	}
-	else if (status >= REGISTRD && command[0] == "BOT\r") // Lulu
+	else if (status >= REGISTRD && command[0] == "BOT") // Lulu
 		checkBot(command, fd);
 	else
 		sendServerMessage(fd, "451", ":You have not registered");

@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/09 20:50:18 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/11 18:55:04 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,14 +65,14 @@ class Server
 		 Bot bot;
 		#endif
 
-		void privToChannel(std::vector<std::string> priv, int clientFd, std::map<std::string, Channel> serverChannels, std::map<int, Client> serverClients);
-		void privToClient(std::vector<std::string> priv, int clientFd, std::map<int, Client> serverClients);
+		void privToChannel(const std::vector<std::string> &priv, int clientFd);
+		void privToClient(const std::vector<std::string> &priv, int clientFd);
 
-		void bot0(std::vector<std::string> bot, const std::string &name, const int &clientFd);
-		void bot1(std::vector<std::string> bot, const std::string &name, const int &clientFd);
-		void bot2(std::vector<std::string> bot, const std::string &name, const int &clientFd);
-		void bot3(std::vector<std::string> bot, const std::string &name, const int &clientFd);
-		void bot4(std::vector<std::string> bot, const std::string &name, const int &clientFd);
+		void bot0(const std::vector<std::string> &bot, const std::string &name, const int &clientFd);
+		void bot1(const std::string &name, const int &clientFd);
+		void bot2(const std::string &name, const int &clientFd);
+		void bot3(const std::vector<std::string> &bot, const std::string &name, const int &clientFd);
+		void bot4(const std::vector<std::string> &bot, const std::string &name, const int &clientFd);
 	public:
 		Server(int port, const std::string &password);
 		~Server();
@@ -90,22 +90,24 @@ class Server
 		void stopSignal();
 		void clearClient(int client_fd);
 		void parseMessage(int client_fd, const std::string &msg);
-		void parseAndExecute(int client_fd, std::string line);
-		void parseCommands(int fd, const std::vector<std::string> &vectorCmd);
+		void parseCommands(int fd, const std::string &vectorCmd);
 		void handleCommands(int fd, const std::vector<std::string> &vectorCmd);
+
+		void sendMsgListClients(const std::vector<std::string> &cmd, const std::set<int> &listClients, int clientFd, std::string msg);
+		const std::string privmsgMsg(int clientFd, const std::vector<std::string> &priv, const std::string &target);
 
 		void sendServerMessage(int clientFd, const std::string &code, const std::string &error);
 
-		void checkPass(int clientFd);
+		void checkStatus(int clientFd);
 
-		void checkPass(std::vector<std::string> pass, int clientFd);
-		void checkNick(std::vector<std::string> nick, int clientFd);
+		void checkPass(const std::vector<std::string> &pass, int clientFd);
+		void checkNick(const std::vector<std::string> &nick, int clientFd);
 
-		void checkUser(std::vector<std::string> user, int fd);
+		void checkUser(const std::vector<std::string> &user, int fd);
 
-		void checkInfo(std::vector<std::string> info, int clientFd);
-		void checkPrivmsg(std::vector<std::string> priv, int clientFd);
-		void checkBot(std::vector<std::string> bot, int clientFd);
+		void checkInfo(const std::vector<std::string> &info, int clientFd);
+		void checkPrivmsg(const std::vector<std::string> &priv, int clientFd);
+		void checkBot(const std::vector<std::string> &bot, int clientFd);
 
 		template <typename T>
 		std::string toString(T numericalValue)

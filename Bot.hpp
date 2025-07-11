@@ -44,6 +44,8 @@ if you can tell me more about you, first will you introduce me your login:"
 #define botBack1 "  │⧘🧿⧙│  │⧘🧿⧙│  │⧘🧿⧙│ "
 #define botBack2 "   ___」   ___」  ___」"
 
+// std::string summonExpressions = "divination,tarot,futur,42forecast,DE-CODER,Dcoder,decoder,read me,akinator";
+
 /*
 PRIVMSG user :Please authenticate here: 
 https://api.intra.42.fr/oauth/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code

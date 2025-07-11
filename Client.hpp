@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 23:15:57 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/08 19:35:45 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/10 15:00:28 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,5 +71,6 @@ class Client
 		void setRealName(const std::string &newRealName);
 		void setIp(const std::string &ip);
 		void setBotConvStep(const int &updatedStep);
-		void setLogin(const std::string &login);
+		void setLogin(const std::string &newLogin);
+		void setStatus(const int &newStatus);
 };

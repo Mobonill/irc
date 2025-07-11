@@ -10,12 +10,13 @@ const std::set <Client *> &Channel::getListClients() const { return _listClients
 
 const std::map <int, std::string> &Channel::getAllClientPriviledge() const { return _clientPriviledge; }
 
-const std::string *Channel::getClientPriviledge(int clientFd) const
+const std::string Channel::getClientPriviledge(int clientFd) const
 {
+	std::string nullstr = "";
 	if (_clientPriviledge.find(clientFd) != _clientPriviledge.end())
-		return &_clientPriviledge.at(clientFd);
+		return _clientPriviledge.at(clientFd);
 	else
-		return NULL;
+		return nullstr;
 }
 
 void Channel::addClient(Client *client)
