@@ -6,7 +6,7 @@
 /*   By: zserobia <zserobia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/27 11:41:43 by zserobia         ###   ########.fr       */
+/*   Updated: 2025/07/15 13:21:25 by zserobia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,13 +65,13 @@ class Server {
 		void parseAndExecute(int client_fd, std::string line);
 		void handleCommands(int fd, const std::vector<std::string> &vectorCmd);
 		void sendError(int client_fd, const std::string &errorMsg);
-		// void checkPass(int client_fd, const std::string &cmd);
+		void checkPass(int client_fd, const std::string &cmd);
+		void checkNick(int client_fd, const std::string &cmd);
 		    // ❗ Добавь эту строку:
     bool isAuthenticated(int fd);
 
     // остальные методы
    // void checkJoin(int fd, const std::string &cmd);
-    //void checkKick(int fd, const std::string &cmd);
     void checkInvite(int fd, const std::string &cmd);
     void checkTopic(int fd, const std::string &cmd);
 

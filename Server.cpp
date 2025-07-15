@@ -6,7 +6,7 @@
 /*   By: zserobia <zserobia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:17 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/18 17:10:04 by zserobia         ###   ########.fr       */
+/*   Updated: 2025/07/15 13:22:51 by zserobia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,13 +235,13 @@ void Server::handleCommands(int fd, const std::vector<std::string> &vectorCmd) {
     if (vectorSpliter.empty())
       continue;
     if (vectorSpliter[0] == "PASS") {
-      // checkPass(fd, cmd);
+      checkPass(fd, cmd);
     }
     else if (vectorSpliter[0] == "NICK") {
-      // checkNick(fd, cmd);
+      checkNick(fd, cmd);
     }
     else if (vectorSpliter[0] == "USER") {
-      // checkUser(fd, cmd);
+      checkUser(fd, cmd);
     }
     else if (vectorSpliter[0] == "JOIN") {
         checkJoin(fd, cmd);
@@ -273,25 +273,20 @@ void Server::handleCommands(int fd, const std::vector<std::string> &vectorCmd) {
   }
 }
 
-// void Server::checkPass(int client_fd, const std::string &cmd)
-// {
-//     std::vector<std::string> pass = splitString(cmd, " ");
-//   (void)client_fd;
-//     if (pass.size() != 2)
-//     {
-//         // sendError(client_fd, "461 PASS :Not enough parameters");
-//         return;
-//     }
-//     if (pass[1] == _password) 
-//         std::cout << "Client " << client_fd << " authenticated successfully." << std::endl;
-//     else {
-//         // sendError(client_fd, "464 :Password incorrect");
-//         clearClient(client_fd);
-//     }
-// }
+void Server::checkPass(int client_fd, const std::string &cmd)
+{
+    (void)cmd;
+    if (_clients[client_fd].getAuthenticated() == true)
+    {
+        std::cout << "already authenticted\n";
+        return ;
+    }
+    _clients[client_fd].setAuthenticated(true);
+    std::cout << "Client " << client_fd << " authenticated successfully." << std::endl;
+}
 
-// void Server::sendError(int client_fd, const std::string &errorMsg)
-// {
-//    // std::string errorMessage = ":" + _serverName + " " + errorMsg + "\r\n";
-//     send(client_fd, errorMessage.c_str(), errorMessage.size(), 0);
-// }
+void Server::checkNick(int client_fd, const std::string &cmd)
+{
+    std::vector<std::string> vectorSpliter = spli
+    _clients[client_fd].setNickName(cmd);
+}
