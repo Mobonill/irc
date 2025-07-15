@@ -6,7 +6,7 @@
 /*   By: zserobia <zserobia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 23:20:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/15 13:13:59 by zserobia         ###   ########.fr       */
+/*   Updated: 2025/07/15 16:28:38 by zserobia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,29 @@
 
 // Конструктор по умолчанию
 Client::Client()
-  : _clientSocket(-1), _nickname("*"), _authenticated(false) {}
+  : _clientSocket(-1),
+    _nickname("*"),
+    _authenticated(false),
+    _status(NOT_AUTHENTCATD),
+    _botConvStep(0),
+    _hasUserCommand(false),
+    _hasNickCommand(false),
+    _isRegistered(false)
+{}
 
-Client::Client(int clientSock) 
-  : _clientSocket(clientSock), _nickname("*"), _authenticated(false) {}
+
+Client::Client(int clientSock)
+  : _clientSocket(clientSock),
+    _nickname("*"),
+    _authenticated(false),
+    _status(NOT_AUTHENTCATD),
+    _botConvStep(0),
+    _hasUserCommand(false),
+    _hasNickCommand(false),
+    _isRegistered(false)
+{}
+
+
 
 Client::~Client() {}
 
@@ -29,9 +48,9 @@ const std::string &Client::getNickName() const { return _nickname; }
 
 //bool Client::getAuthenticated() const { return _authenticated; }
 
-/*const std::map<std::string, Channel*> &Client::getJoinedChannels() const {
+const std::map<std::string, Channel*> &Client::getJoinedChannels() const {
     return _joinedChannels;
-}*/
+}
 
 void Client::setAuthenticated(bool status) { _authenticated = status; }
 
@@ -73,12 +92,10 @@ const int &Client::getStatus() const { return _status; }
 const int &Client::getBotConvStep() const { return _botConvStep; }
 
 void Client::setUserName(const std::string &newUserName) { _username = newUserName;}
+void Client::setServerName(const std::string &newServerName) { _servername = newServerName; }
+void Client::setHostName(const std::string &newHostName) { _hostname = newHostName; }
+void Client::setRealName(const std::string &newRealName) { _realname = newRealName; }
 
-void Client::setServerName(const std::string &newServerName) { _username = newServerName;}
-
-void Client::setHostName(const std::string &newHostName) { _username = newHostName;}
-
-void Client::setRealName(const std::string &newRealName) { _username = newRealName;}
 
 void Client::setIp(const std::string &ip)
 {
@@ -103,3 +120,10 @@ void Client::setStatus(const int &newStatus)
     if (newStatus >= NOT_AUTHENTCATD && newStatus <= IN_CHANNEL)
         _status = newStatus;
 }
+
+		bool Client::hasUserCommand() const { return _hasUserCommand; }
+		void Client::setHasUserCommand(bool val) { _hasUserCommand = val; }
+		bool Client::hasNickCommand() const { return _hasNickCommand; }
+		void Client::setHasNickCommand(bool val) { _hasNickCommand = val; }
+		bool Client::isRegistered() const { return _isRegistered; }
+		void Client::setRegistered(bool val) { _isRegistered = val; }

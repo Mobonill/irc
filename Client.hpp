@@ -6,7 +6,7 @@
 /*   By: zserobia <zserobia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 23:15:57 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/15 13:15:23 by zserobia         ###   ########.fr       */
+/*   Updated: 2025/07/15 16:22:08 by zserobia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,9 @@ private:
 		std::string _login;
 		int _botConvStep; //from 0 to 7 stages of tarot conv...not sure about that
 		std::vector<int> _cards; // the 3 drawn numbered cards
-
+		bool _hasUserCommand;
+		bool _hasNickCommand;
+		bool _isRegistered;
 public:
 	Client(); // добавлен конструктор по умолчанию
 	Client(int clientSock);
@@ -58,7 +60,7 @@ public:
 	int getClientSocket() const;
 	const std::string &getNickName() const;
 	//bool getAuthenticated() const;
-	//const std::map<std::string, Channel*> &getJoinedChannels() const;
+	const std::map<std::string, Channel*> &getJoinedChannels() const;
 
 	void setAuthenticated(bool status);
 	void setNickName(const std::string &newNickName);
@@ -76,7 +78,7 @@ public:
 		const std::string &getIp() const;
 		const std::string &getLogin() const;
 		const bool &getAuthenticated() const;
-		const std::map<std::string, Channel> &getJoinedChannels() const;
+		//const std::map<std::string, Channel> &getJoinedChannels() const;
 		const int &getStatus() const;
 		const int &getBotConvStep() const;
 
@@ -88,4 +90,11 @@ public:
 		void setBotConvStep(const int &updatedStep);
 		void setLogin(const std::string &newLogin);
 		void setStatus(const int &newStatus);
+
+		bool hasUserCommand() const;
+		void setHasUserCommand(bool val);
+		bool hasNickCommand() const ;
+		void setHasNickCommand(bool val);
+		bool isRegistered() const;
+		void setRegistered(bool val);
 };

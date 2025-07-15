@@ -6,7 +6,7 @@
 /*   By: zserobia <zserobia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/15 13:21:25 by zserobia         ###   ########.fr       */
+/*   Updated: 2025/07/15 16:10:39 by zserobia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@
 #include <sstream>
 #include "Client.hpp"
 
-
+class Client;
 
 class Channel;
 
@@ -98,7 +98,9 @@ class Server {
 	bool isValidChannelName1(const std::string& channelName);
 
 	void handlePrivmsg(int senderFd, const std::vector<std::string>& tokens);
-	
+	void checkUser(int fd, const std::string& cmd);
+	void sendWelcomeMessage(Client& client);
+	void sendToClient(int fd, const std::string& message);
 };
 
 

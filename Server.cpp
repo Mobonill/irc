@@ -6,7 +6,7 @@
 /*   By: zserobia <zserobia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:17 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/15 13:22:51 by zserobia         ###   ########.fr       */
+/*   Updated: 2025/07/15 17:40:05 by zserobia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,10 +235,10 @@ void Server::handleCommands(int fd, const std::vector<std::string> &vectorCmd) {
     if (vectorSpliter.empty())
       continue;
     if (vectorSpliter[0] == "PASS") {
-      checkPass(fd, cmd);
+      //checkPass(fd, cmd);
     }
     else if (vectorSpliter[0] == "NICK") {
-      checkNick(fd, cmd);
+     // checkNick(fd, cmd);
     }
     else if (vectorSpliter[0] == "USER") {
       checkUser(fd, cmd);
@@ -284,9 +284,85 @@ void Server::checkPass(int client_fd, const std::string &cmd)
     _clients[client_fd].setAuthenticated(true);
     std::cout << "Client " << client_fd << " authenticated successfully." << std::endl;
 }
-
-void Server::checkNick(int client_fd, const std::string &cmd)
-{
-    std::vector<std::string> vectorSpliter = spli
-    _clients[client_fd].setNickName(cmd);
+void Server::sendToClient(int fd, const std::string& message) {
+    send(fd, message.c_str(), message.length(), 0);
 }
+
+void Server::sendWelcomeMessage(Client& client) {
+    std::string nick = client.getNickName();
+    int fd = client.getClientSocket();
+
+    sendToClient(fd, ":localhost 001 " + nick + " :Welcome to IRC\r\n");
+    sendToClient(fd, ":localhost 002 " + nick + " :Your host is localhost\r\n");
+    sendToClient(fd, ":localhost 003 " + nick + " :This server was created today\r\n");
+    sendToClient(fd, ":localhost 004 " + nick + " localhost 1.0 o o\r\n");
+}
+
+
+
+void Server::checkUser(int fd, const std::string& cmd) {
+    Client& client = _clients[fd];
+
+    if (client.hasUserCommand()) {
+        sendToClient(fd, ":localhost 462 * :You may not reregister\r\n");
+        return;
+    }
+
+    size_t colonPos = cmd.find(" :");
+    if (colonPos == std::string::npos) {
+        sendToClient(fd, ":localhost 461 * USER :Not enough parameters\r\n");
+        return;
+    }
+
+    std::string beforeColon = cmd.substr(0, colonPos);
+    std::string realname = cmd.substr(colonPos + 2); // skip " :"
+
+    std::istringstream iss(beforeColon);
+    std::string command, username, hostname, servername;
+    iss >> command >> username >> hostname >> servername;
+
+    if (username.empty() || hostname.empty() || servername.empty() || realname.empty()) {
+        sendToClient(fd, ":localhost 461 * USER :Not enough parameters\r\n");
+        return;
+    }
+
+        // (Optional) Add ~ prefix if ident is not used
+   // Set the client's username, adding a "~" prefix (common in IRC when ident is not verified)
+    client.setUserName("~" + username); // ~guest
+    // Set the client's hostname (sent as part of the USER command)
+    client.setHostName(hostname); // 0
+    // Set the server name provided by the client (may be ignored in many IRC servers)
+    client.setServerName(servername);  // *
+    // Set the real name (the part after the ':' in the USER command)
+    client.setRealName(realname); // Ronnie Reagan
+    // Mark that the client has now sent the USER command
+    client.setHasUserCommand(true);
+    // If the client has already sent the NICK command too...
+    if (client.hasNickCommand()) {
+        // ...consider the client fully registered on the server
+        client.setRegistered(true);
+        // Send a welcome message (usually numeric replies like 001, 002, etc.)
+        sendWelcomeMessage(client);
+    }
+}
+
+//USER guest 0 * :Ronnie Reagan
+//USER <username> <hostname> <servername> :<realname>
+
+// Parameters: <username> 0 * <realname>
+
+/*guest — это username (имя пользователя, не обязательно уникальное).
+
+0 — это hostname (можно игнорировать; раньше использовалось для указания клиента/хоста).
+
+* — это servername (обычно не используется; IRC-сервер всё равно подставит своё имя).
+
+Ronnie Reagan — это реальное имя пользователя, записывается после :.*/
+/*if (client.hasNickCommand()):
+Checks if the client already sent the NICK command earlier.
+
+client.setRegistered(true);:
+Marks the client as fully registered (ready to join channels, send messages, etc.).
+
+sendWelcomeMessage(client);:
+Sends the welcome message (usually numeric replies 001–004 in IRC) to the client as confirmation of successful login/registration.*/
