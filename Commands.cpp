@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 15:36:07 by lchauffo          #+#    #+#             */
-/*   Updated: 2025/07/11 19:00:38 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/17 14:21:54 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,18 +16,16 @@
 #include <fstream>
 #include <set>
 
-//:servername CODE * COMMAND :message
-//:servername → your server name
-// CODE → IRC numeric reply
-// * → the client nickname, if not registered put '*' instead
-// COMMAND → the command being responded to
-// :message → the error message
-
 void	Server::sendServerMessage(int clientFd, const std::string &code, const std::string &entry)
 {
 	std::string clientName = _clients[clientFd].getNickName();
 	std::string fullMessage = ":" + _serverName + " " + code + " " + clientName + " " + entry + "\r\n";
 	send(clientFd, fullMessage.c_str(), fullMessage.size(), 0);
+}
+
+void	Server::checkVersion(int client_fd)
+{
+	std::cout << "I don´t fuck*ng know\n";
 }
 
 void	Server::checkStatus(int clientFd)
@@ -105,6 +103,9 @@ void	Server::checkNick(const std::vector<std::string> &nick, int clientFd)
 // Parameters: <username> <hostname> <servername> <realname>
 void	Server::checkUser(const std::vector<std::string> &user, int clientFd)//Morgane
 {
+	std::cout << "**********DEBUG: checkUser called with " << user.size() << " parameters" << std::endl;
+	for (std::vector<std::string>::const_iterator vit = user.begin(); vit != user.end(); ++vit)
+		std::cout << *vit << std::endl;
 	_clients[clientFd].setServerName("patate");
 	_clients[clientFd].setUserName("lchauffo");
 	_clients[clientFd].setHostName("lulu");
@@ -145,11 +146,6 @@ void	Server::checkInfo(const std::vector<std::string> &info, int clientFd)//Lulu
 // void	checkInvite(int fd, std::string cmd)//Zara
 // {}
 
-// Each IRC message may consist of up to three main parts: the prefix
-// (OPTIONAL), the command, and the command parameters (maximum of
-// fifteen (15)).  The prefix, command, and all parameters are separated
-// by one ASCII space character (0x20) each.
-
 void	Server::privToChannel(const std::vector<std::string> &priv, int clientFd)
 {
 	std::cout << "PrivToChannel\n";
@@ -181,7 +177,6 @@ void	Server::privToChannel(const std::vector<std::string> &priv, int clientFd)
 							if (mit->second.getClientPriviledge(clientFd).find('@') != std::string::npos && ++operatorStatus)
 								addClientsFd(mit->second, allMatchChannelsClients);
 				}
-				std::cout << "DEBUG: allMatchChannelsClients size: " << allMatchChannelsClients.size() << std::endl;
 				sendMsgListClients(priv, allMatchChannelsClients,clientFd, msg);
 			}
 		}
@@ -196,29 +191,16 @@ void	Server::privToClient(const std::vector<std::string> &priv, int clientFd)
 {
 	std::cout << "PrivToClient - dest: " << priv[1] << std::endl;
 	std::vector<std::string> multiClients = splitString(priv[1], ",");
-	std::cout << "Nbr of receivers: " << multiClients.size() << std::endl;
-	for (std::vector<std::string>::iterator vit = multiClients.begin(); vit != multiClients.end(); ++vit)
-		std::cout << "-- receiver: " << *vit << std::endl;
-	std::cout << "end of vector multiClients\n";
 	if (multiClients.size() > 15)
 		return sendServerMessage(clientFd, "407", "PRIVMSG "+ priv[1] + " :Duplicate recipients. No message delivered");
 	std::set<int> existingClients;
 	std::set<std::string> notFound;
-	int clientFound = multiClients.size();
-	std::cout << "-- " << clientFound << " potential receiver(s)\n";
 	for (std::vector<std::string>::iterator thisClient = multiClients.begin(); thisClient != multiClients.end(); ++thisClient)
 	{
-		std::cout << "-- this client: [" << *thisClient << "]" << std::endl;
 		std::map <int, Client>::iterator mit;
 		for (mit = _clients.begin(); mit != _clients.end(); ++mit)
-		{
-			std::cout << "-- other client: [" << mit->second.getNickName() << "]" << std::endl;
 			if (*thisClient == mit->second.getNickName())
-			{
-				clientFound--;
 				break ;
-			}
-		}
 		if (mit == _clients.end())
 			notFound.insert(*thisClient);
 		else
@@ -229,7 +211,6 @@ void	Server::privToClient(const std::vector<std::string> &priv, int clientFd)
 	std::cout << "Size: " << notFound.size() << " notfound clients" << std::endl;
 	for (std::set<std::string>::iterator sit = notFound.begin(); sit != notFound.end(); ++sit)
 		sendServerMessage(clientFd, "401", "PRIVMSG "+ *sit + ":No such nick/channel");
-	std::cout << "end of function: privToClient" << std::endl;
 }
 
 // :nickname!username@hostname
@@ -242,8 +223,6 @@ void	Server::checkPrivmsg(const std::vector<std::string> &priv, int clientFd)//L
 		return sendServerMessage(clientFd, "411", "PRIVMSG :No recipient given");
 	else if (priv.size() < 3)
 		return sendServerMessage(clientFd, "412", "PRIVMSG :No text to send");
-
-	std::cout << "priv[1][0] = " << priv[1][0] << " of " << priv[1] << std::endl;
 	if (priv[1][0] == '#')
 		privToChannel(priv, clientFd);
 	else
@@ -252,6 +231,8 @@ void	Server::checkPrivmsg(const std::vector<std::string> &priv, int clientFd)//L
 
 bool summonBot(const std::string &msg)//check the presence of one summonExpression in a message to initiate a bot conversation
 {
+	if (msg.empty())
+		return false;
 	std::string summonExpressions = "divination,taro,futur,42forecast,DE-CODER,Dcoder,decoder,read me,akinator";
 	std::vector<std::string> summonBot = splitString(summonExpressions, ",");
 	std::vector<std::string>::iterator vit;
@@ -266,16 +247,18 @@ void 	Server::bot0(const std::vector<std::string> &bot, const std::string &name,
 	std::string composeMsg;
 	std::string bmsg;
 
-	if (bot.size() > 1 && (bot[1][0] != ':' || summonBot(rebuildMessage(bot)) == true))
+	std::cout << "-- entering bot [0]" << std::endl;
+	std::string rebuilt = rebuildMessage(bot);
+	if (bot.size() > 1 && (bot[1][0] != ':' || summonBot(rebuilt) == true))//BOT (ok)|| BOT hello (ko)|| BOT :hello (ko)|| BOT :future (ok)
 		return sendServerMessage(clientFd, "421", "BOT :Unknown command");
+	std::srand(std::time(0));
 	const int randthree = std::rand() % 3;
-	std::string he = "he";
 	if (randthree == 0)
-		composeMsg = X03D + bot0Call1 + name + bot0Call2 + "\x0F";
+		composeMsg = PINK + bot0Call1 + name + bot0Call2 + RST;
 	else if (randthree == 1)
-		composeMsg = X03D + bot1Call1 + name + bot1Call2 + "\x0F";
+		composeMsg = PINK + bot1Call1 + name + bot1Call2 + RST;
 	else if (randthree == 2)
-		composeMsg = X03D + bot2Call1 + name + bot2Call2 + "\x0F";
+		composeMsg = PINK+ bot2Call1 + name + bot2Call2 + RST;
 	bmsg = botMsg(name, composeMsg);
 	send(clientFd, bmsg.c_str(), bmsg.size(), 0);
 	_clients[clientFd].setBotConvStep(2);
@@ -286,7 +269,8 @@ void 	Server::bot1(const std::string &name, const int &clientFd)//here, client s
 	std::string composeMsg;
 	std::string bmsg;
 
-	composeMsg = X03D + botKeyWordActivate1 + name + botKeyWordActivate2 + "\x0F";
+	std::cout << "-- entering bot [1]" << std::endl;
+	composeMsg = BLU + botKeyWordActivate1 + name + botKeyWordActivate2 + RST;
 	bmsg = botMsg(name, composeMsg);
 	send(clientFd, bmsg.c_str(), bmsg.size(), 0);
 	_clients[clientFd].setBotConvStep(2);
@@ -297,10 +281,11 @@ void 	Server::bot2(const std::string &name, const int &clientFd)//follow with wa
 	std::string composeMsg;
 	std::string bmsg;
 
-	composeMsg = X01DX034 + botWarning0 + "\x0F";
+	std::cout << "-- entering bot [2]" << std::endl;
+	composeMsg = ITALIC + BOLD + SPOILER + botWarning0 + RST;
 	bmsg = botMsg(name, composeMsg);
 	send(clientFd, bmsg.c_str(), bmsg.size(), 0);
-	composeMsg = X03D + botSummon + "\x0F";
+	composeMsg = RDM + botSummon + RST;
 	bmsg = botMsg(name, composeMsg);
 	send(clientFd, bmsg.c_str(), bmsg.size(), 0);
 	_clients[clientFd].setBotConvStep(3);
@@ -311,9 +296,10 @@ void 	Server::bot3(const std::vector<std::string> &bot, const std::string &name,
 	std::string composeMsg;
 	std::string bmsg;
 
+	std::cout << "-- entering bot [3]" << std::endl;
 	if (bot.size() == 1)
 	{
-		composeMsg = X03D + botWait + "\x0F";
+		composeMsg = BLU + botWait + RST;
 		bmsg = botMsg(name, composeMsg);
 		send(clientFd, bmsg.c_str(), bmsg.size(), 0);
 		_clients[clientFd].setBotConvStep(0);
@@ -329,23 +315,23 @@ void 	Server::bot3(const std::vector<std::string> &bot, const std::string &name,
 			msg.erase(spaces + 1, end);
 		if (msg.compare(botVerif) == 0 || msg.compare(botNameVerif) == 0)
 		{
-			composeMsg = X03D + botAccept + "\x0F";
+			composeMsg = PINK + botAccept + RST;
 			bmsg = botMsg(name, composeMsg);
 			send(clientFd, bmsg.c_str(), bmsg.size(), 0);
-			composeMsg = X03D + botSerious + "\x0F";
+			composeMsg = PINK + botSerious + RST;
 			bmsg = botMsg(name, composeMsg);
 			send(clientFd, bmsg.c_str(), bmsg.size(), 0);
-			composeMsg = X03D + botLogin + "\x0F";
+			composeMsg = PINK + botLogin + RST;
 			bmsg = botMsg(name, composeMsg);
 			send(clientFd, bmsg.c_str(), bmsg.size(), 0);
-			composeMsg = X01DX034 + botWarning1 + "\x0F";
+			composeMsg = ITALIC + BOLD + PINK + botWarning1 + RST;
 			bmsg = botMsg(name, composeMsg);
 			send(clientFd, bmsg.c_str(), bmsg.size(), 0);
 			_clients[clientFd].setBotConvStep(4);
 		}
 		else
 		{
-			composeMsg = X03D + noBot + msg+ "\x0F";
+			composeMsg = RDM + noBot + msg+ RST;
 			bmsg = botMsg(name, composeMsg);
 			send(clientFd, bmsg.c_str(), bmsg.size(), 0);
 			_clients[clientFd].setBotConvStep(0);
@@ -358,16 +344,17 @@ void 	Server::bot4(const std::vector<std::string> &bot, const std::string &name,
 	std::string composeMsg;
 	std::string bmsg;
 
+	std::cout << "-- entering bot [4]" << std::endl;
 	if (bot.size() == 1)
 	{
-		composeMsg = X03D + botWait + "\x0F";
+		composeMsg = BLU + botWait + RST;
 		bmsg = botMsg(name, composeMsg);
 		send(clientFd, bmsg.c_str(), bmsg.size(), 0);
 		_clients[clientFd].setBotConvStep(0);
 	}
 	else if (bot.size() > 2)
 	{
-		composeMsg = X03D + botWait + "\x0F";
+		composeMsg = PINK + botWait + RST;
 		bmsg = botMsg(name, composeMsg);
 		send(clientFd, bmsg.c_str(), bmsg.size(), 0);
 		_clients[clientFd].setBotConvStep(0);
@@ -382,9 +369,9 @@ void 	Server::bot4(const std::vector<std::string> &bot, const std::string &name,
 
 void	Server::checkBot(const std::vector<std::string> &bot, int clientFd)//Lulu
 {
+	std::cout << "DEBUG: checkBot called with " << bot.size() << " parameters" << std::endl;
 	int step = _clients[clientFd].getBotConvStep();
 	std::string name = _clients[clientFd].getNickName();
-	std::srand(std::time(0));
 	if (step == 0)
 		bot0(bot, name, clientFd);
 	else if (step == 1)
@@ -395,7 +382,7 @@ void	Server::checkBot(const std::vector<std::string> &bot, int clientFd)//Lulu
 		bot3(bot, name, clientFd);
 	else if (step == 4)
 		bot4(bot, name, clientFd);
-	;;;
+	std::cout << "end of function checkBot()\n";
 }
 
 // PASS NICK USER JOIN TOPIC KICK MODE INFO INVITE PRIVMSG BOTde-coder

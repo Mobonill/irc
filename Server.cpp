@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:17 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/11 17:38:43 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/17 13:25:53 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,19 +187,32 @@ void Server::clearClient(int client_fd)
 
 void Server::parseMessage(int client_fd, const std::string &msg)
 {
+	std::cout << "DEBUG !!!\n";
+	std::cout << "- _clientBuffers[client_fd] = [" << _clientBuffers[client_fd] << "]" << std::endl;
 	_clientBuffers[client_fd] += msg;
+	std::cout << "- _clientBuffers[client_fd] = [" << _clientBuffers[client_fd] << "]" << std::endl;
 
 	std::string &buffer = _clientBuffers[client_fd];
 	size_t pos;
-
+	std::cout << "- buffer: [" << buffer << "]" << std::endl;
+	std::cout << "- msg: [" << msg << "]" << std::endl;
 	while ((pos = buffer.find("\n")) != std::string::npos)
 	{
+		std::cout << "-- pos of = [" << pos << "]" << std::endl;
 		std::string line = buffer.substr(0, pos);
+		std::cout << "-- line: [" << line << "]" << std::endl;
 		if (!line.empty() && line[line.length() - 1] == '\r')
+		{
+			std::cout << "--- inside if: [" << line[line.length() - 1] << "]\n";
 			line.erase(line.length() - 1);
+		}
+		std::cout << "-- line: [" << line << "]" << std::endl;
 		buffer.erase(0, pos + 1);
+		std::cout << "-- buffer: [" << buffer << "]" << std::endl;
 		parseCommands(client_fd, line);
 	}
+	std::cout << "- no more commands\n";
+	std::cout << "!!!END DEBUG\n";
 }
 
 void Server::parseCommands(int fd, const std::string &line)
@@ -209,7 +222,7 @@ void Server::parseCommands(int fd, const std::string &line)
 	std::vector<std::string> split_cmdline = splitString(line, " ");
 	if (split_cmdline.empty())
 		return ;
-	std::string cmdsArray[] = { "STATUS","PASS","NICK","USER","JOIN","TOPIC","KICK","MODE","INFO","INVITE","PRIVMSG","BOT"};
+	std::string cmdsArray[] = { "VERSION","STATUS","PASS","NICK","USER","JOIN","TOPIC","KICK","MODE","INFO","INVITE","PRIVMSG","BOT"};
 	std::set<std::string> cmdsCatalog(cmdsArray, cmdsArray + sizeof(cmdsArray) / sizeof(std::string));
 	if (cmdsCatalog.find(split_cmdline[0]) != cmdsCatalog.end())
 			handleCommands(fd, split_cmdline);
@@ -225,7 +238,9 @@ void Server::handleCommands(int fd, const std::vector<std::string> &command)
 	std::cout << "DEBUG: Client " << fd << " - Status: " << status \
 	<< ", Authenticated: " << authenticated \
 	<< ", Command: '" << command[0] << "'" << std::endl;
-	if (command[0] == "STATUS")
+	if (command[0] == "VERSION")
+		checkVersion(fd);
+	else if (command[0] == "STATUS")
 		checkStatus(fd);
 	else if (status >= NOT_AUTHENTCATD && command[0] == "PASS") //store the password
 	{

@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 19:54:19 by lchauffo          #+#    #+#             */
-/*   Updated: 2025/07/11 18:58:23 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/17 13:20:07 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,28 +27,20 @@ const std::string Server::privmsgMsg(int clientFd, const std::vector<std::string
 	std::cout << "inside privMsg\n";
 	std::string nullStr = "";
 	if (foundClient == _clients.end())
-	{
-		std::cerr << "-- client is empty\n";
 		return nullStr;
-	}
 	Client thisClient = foundClient->second;
-	std::cout << "" << "thisClient.getNickName(): " << thisClient.getNickName() << std::endl;
-	
-	std::cout << "thisClient.getNickName() : " << thisClient.getNickName() << std::endl;
-	std::cout << "thisClient.getUserName()" << thisClient.getUserName() << std::endl;
-	std::cout << "thisClient.getIp()" << thisClient.getIp() << std::endl;
 	std::string clientFullAddress = thisClient.getNickName() + "!" + thisClient.getUserName() + "@" + thisClient.getIp();
 	std::cout << clientFullAddress << std::endl;
 	std::string fullmsg = rebuildMessage(priv);
-	std::cout <<"-- rebuild message: " << fullmsg << std::endl;
 	std::string msg = std::string(":") + clientFullAddress + " PRIVMSG " + target + " " + fullmsg + "\r\n";
-	std::cout << "-- full message: " << msg << std::endl;
 	return msg;
 }
 
 const std::string botMsg(const std::string &clientNick, const std::string &msg)
 {
-	std::string fullMsg = std::string(":") + " \x03D D-CODER!BOT\x0F@localhost" + " \x02PRIVMSG\x0F " + clientNick + " :" + msg + botEnd;
+	std::string botAddress = " \x031 D-CODER!BOT\x0F@localhost";//" D-CODER!BOT@localhost" in color
+	std::string cmd = "\x02 PRIVMSG\x0F ";//" PRIVMSG " in BOLD
+	std::string fullMsg = std::string(":") + botAddress + cmd + clientNick + " :" + msg + botEnd;
 	return fullMsg;
 }
 
@@ -59,10 +51,7 @@ void Server::sendMsgListClients(const std::vector<std::string> &cmd, const std::
 		if (msg.empty())
 			msg = privmsgMsg(clientFd, cmd, _clients[*fd].getNickName());
 		if (!msg.empty() && *fd != clientFd)
-		{
-			std::cout << "mesg = " << msg << std::endl;
 			send(*fd, msg.c_str(), msg.size(), 0);
-		}
 	}
 }
 

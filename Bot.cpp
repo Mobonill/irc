@@ -5,6 +5,11 @@ Bot::Bot() : _accessToken("") { loadOAuthConfig(); }
 
 Bot::~Bot() {}
 
+void	Bot::initializeBot()
+{
+	
+}
+
 void	Bot::loadOAuthConfig()
 {
 	// if (!BONUS)

@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/11 18:55:04 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/17 14:25:43 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ class Server
 		int _max_fd;
 		std::string _serverName;
 		#ifndef BONUS
-		 Bot bot;
+		 Bot _bot;
 		#endif
 
 		void privToChannel(const std::vector<std::string> &priv, int clientFd);
@@ -97,7 +97,9 @@ class Server
 		const std::string privmsgMsg(int clientFd, const std::vector<std::string> &priv, const std::string &target);
 
 		void sendServerMessage(int clientFd, const std::string &code, const std::string &error);
+		// const std::string botMsg(const std::string &clientNick, const std::string &msg);
 
+		void checkVersion(int client_fd);
 		void checkStatus(int clientFd);
 
 		void checkPass(const std::vector<std::string> &pass, int clientFd);
@@ -107,7 +109,9 @@ class Server
 
 		void checkInfo(const std::vector<std::string> &info, int clientFd);
 		void checkPrivmsg(const std::vector<std::string> &priv, int clientFd);
+		#ifndef BONUS
 		void checkBot(const std::vector<std::string> &bot, int clientFd);
+		#endif
 
 		template <typename T>
 		std::string toString(T numericalValue)
