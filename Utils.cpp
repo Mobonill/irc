@@ -6,11 +6,29 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 22:15:02 by morgane           #+#    #+#             */
-/*   Updated: 2025/06/25 19:54:39 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/29 11:35:52 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+
+const std::string	isValidPassword(const std::string &password)
+{
+	if (password.size() > 128)
+		return "More than 128 char password.";
+	bool onlyspace = true;
+	for (size_t i = 0; i < password.size(); ++i)
+	{
+		if (!std::isprint(password[i]))
+			return "Use of non-printable ascii char.";
+		if (onlyspace == true && password[i] != ' ')
+			onlyspace = false;
+	}
+	if (onlyspace)
+		return "Only-space password detected.";
+	else
+		return "";
+}
 
 std::vector<std::string> splitString(const std::string& str, const char* delimiter)
 {
