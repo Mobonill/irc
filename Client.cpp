@@ -6,7 +6,7 @@
 /*   By: zserobia <zserobia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 23:20:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/15 16:28:38 by zserobia         ###   ########.fr       */
+/*   Updated: 2025/07/31 14:26:35 by zserobia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,9 @@ const std::string &Client::getUserName() const { return _username; }
 const std::string &Client::getIp() const { return _ip; }
 
 const std::string &Client::getLogin() const { return _login; }
-
+const std::string &Client::getHostName() const {
+    return _hostname;
+}
 const bool &Client::getAuthenticated() const { return _authenticated; }
 
 //const std::map<std::string, Channel> &Client::getJoinedChannels() const { return _joinedChannels; }

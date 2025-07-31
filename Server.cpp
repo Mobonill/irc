@@ -6,7 +6,7 @@
 /*   By: zserobia <zserobia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:17 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/15 17:40:05 by zserobia         ###   ########.fr       */
+/*   Updated: 2025/07/31 18:52:58 by zserobia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ Server* g_signal = NULL;
 Server::Server(int port, const std::string &password): _port(port), _password(password), _socketFd(-1) {
     _clientsNumber = 0;
     _signal = false;
+    _creationTime = std::time(NULL);
     
 }
 
@@ -287,7 +288,7 @@ void Server::checkPass(int client_fd, const std::string &cmd)
 void Server::sendToClient(int fd, const std::string& message) {
     send(fd, message.c_str(), message.length(), 0);
 }
-
+/*
 void Server::sendWelcomeMessage(Client& client) {
     std::string nick = client.getNickName();
     int fd = client.getClientSocket();
@@ -344,25 +345,4 @@ void Server::checkUser(int fd, const std::string& cmd) {
         // Send a welcome message (usually numeric replies like 001, 002, etc.)
         sendWelcomeMessage(client);
     }
-}
-
-//USER guest 0 * :Ronnie Reagan
-//USER <username> <hostname> <servername> :<realname>
-
-// Parameters: <username> 0 * <realname>
-
-/*guest — это username (имя пользователя, не обязательно уникальное).
-
-0 — это hostname (можно игнорировать; раньше использовалось для указания клиента/хоста).
-
-* — это servername (обычно не используется; IRC-сервер всё равно подставит своё имя).
-
-Ronnie Reagan — это реальное имя пользователя, записывается после :.*/
-/*if (client.hasNickCommand()):
-Checks if the client already sent the NICK command earlier.
-
-client.setRegistered(true);:
-Marks the client as fully registered (ready to join channels, send messages, etc.).
-
-sendWelcomeMessage(client);:
-Sends the welcome message (usually numeric replies 001–004 in IRC) to the client as confirmation of successful login/registration.*/
+}*/

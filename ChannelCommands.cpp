@@ -574,11 +574,11 @@ void Server::checkMode(int fd, const std::string &cmd) {
 
 ///PRIVMSG <target> :\x01DCC SEND <filename> <ip> <port> <filesize>\x01
 //PRIVMSG Bob :\x01DCC SEND myphoto.jpg 3232235777 5000 2048\x01
-//2130706433 — IP-адрес 127.0.0.1 (localhost)
-//IP-адрес отправителя в целом виде (например: 192.168.1.1 → 3232235777).
+//2130706433 — IP-аdress 127.0.0.1 (localhost)
+// 192.168.1.1 → 3232235777).
 //  /dcc send Nickname path/to/file.txt
 
-
+/*
 void Server::handlePrivmsg(int senderFd, const std::vector<std::string>& tokens) {
     if (tokens.size() < 3) {
         sendError(senderFd, ":server 461 PRIVMSG :Not enough parameters\r\n");
@@ -602,7 +602,158 @@ void Server::handlePrivmsg(int senderFd, const std::vector<std::string>& tokens)
     Client& sender = _clients[senderFd];
     std::string fullMsg = ":" + sender.getNickName() + " PRIVMSG " + targetNick + " :" + message + "\r\n";
 
-    // ✅ Просто пересылаем как есть (включая DCC SEND)
+    // +DCC SEND)
     send(receiverFd, fullMsg.c_str(), fullMsg.size(), 0);
 }
 //:Alice!user@host PRIVMSG Bob :\x01DCC SEND myphoto.jpg 3232235777 5000 2048\x01
+
+*/
+
+/*void Server::sendWelcome004(int fd, const Client& client) {
+    std::string nick = client.getNickName();
+    std::string serverName = client.getServerName().empty() ? "localhost" : client.getServerName();
+    std::string serverVersion = "1.0";
+    std::string userModes = "oi";  // modes supported by your server
+    std::string channelModes = "nt"; // modes supported by your server
+
+    std::string msg = ":" + serverName + " 004 " + nick + " " + serverName + " " + serverVersion + " " + userModes + " " + channelModes + "\r\n";
+    sendToClient(fd, msg);
+}*/
+
+
+std::string Server::getServerCreationDate() {
+    char buf[64];
+    std::strftime(buf, sizeof(buf), "%a %b %d %Y", std::localtime(&_creationTime));
+    return std::string(buf);
+}
+
+void Server::sendWelcomeMessage(Client& client) {
+    std::string nick = client.getNickName();
+    int fd = client.getClientSocket();
+
+    sendToClient(fd, ":localhost 001 " + nick + " :" +
+        "Welcome to the Internet Relay Network " + nick + "!" +
+        client.getUserName() + "@" + client.getHostName() + "\r\n");
+
+    sendToClient(fd, ":localhost 002 " + nick + " :" +
+        "Your host is localhost, running version 1.0\r\n");
+
+    sendToClient(fd, ":localhost 003 " + nick + " :" +
+        "This server was created " + getServerCreationDate() + "\r\n");
+
+    sendToClient(fd, ":localhost 004 " + nick + " localhost 1.0 o o\r\n");
+}
+
+void Server::checkUser(int fd, const std::string& cmd) {
+    Client& client = _clients[fd];
+
+    if (client.hasUserCommand()) {
+        sendToClient(fd, ":localhost 462 * :You may not reregister\r\n");
+        return;
+    }
+
+    // Найдём позицию двоеточия, которое отделяет realname
+    size_t colonPos = cmd.find(" :");
+    if (colonPos == std::string::npos) {
+        sendToClient(fd, ":localhost 461 * USER :Not enough parameters\r\n");
+        return;
+    }
+
+    std::string params = cmd.substr(0, colonPos);
+    std::string realname = cmd.substr(colonPos + 2); // часть после " :"
+
+    std::istringstream iss(params);
+    std::string command, username, hostname, servername;
+
+    iss >> command >> username >> hostname >> servername;
+
+    if (command != "USER" || username.empty() || hostname.empty() || servername.empty() || realname.empty()) {
+        sendToClient(fd, ":localhost 461 * USER :Not enough parameters\r\n");
+        return;
+    }
+
+    // Установим данные клиента
+    client.setUserName("~" + username);
+    client.setHostName(hostname);
+    client.setServerName(servername);
+    client.setRealName(realname);
+    client.setHasUserCommand(true);
+
+    if (client.hasNickCommand()) {
+        client.setRegistered(true);
+        sendWelcomeMessage(client);
+    }
+}
+
+
+
+/*void Server::checkUser(int fd, const std::string& cmd) {
+    Client& client = _clients[fd];
+
+    if (client.hasUserCommand()) {
+        sendToClient(fd, ":localhost 462 * :You may not reregister\r\n");
+        return;
+    }
+
+    size_t colonPos = cmd.find(" :");
+    if (colonPos == std::string::npos) {
+        sendToClient(fd, ":localhost 461 * USER :Not enough parameters\r\n");
+        return;
+    }
+
+    std::string beforeColon = cmd.substr(0, colonPos);
+    std::string realname = cmd.substr(colonPos + 2); // skip " :"
+
+    std::istringstream iss(beforeColon);
+    std::string command, username, hostname, servername;
+    iss >> command >> username >> hostname >> servername;
+
+    if (username.empty() || hostname.empty() || servername.empty() || realname.empty()) {
+        sendToClient(fd, ":localhost 461 * USER :Not enough parameters\r\n");
+        return;
+    }
+
+        // (Optional) Add ~ prefix if ident is not used
+   // Set the client's username, adding a "~" prefix (common in IRC when ident is not verified)
+    client.setUserName("~" + username); // ~guest
+    // Set the client's hostname (sent as part of the USER command)
+    client.setHostName(hostname); // 0
+    // Set the server name provided by the client (may be ignored in many IRC servers)
+    client.setServerName(servername);  // *
+    // Set the real name (the part after the ':' in the USER command)
+    client.setRealName(realname); // Ronnie Reagan
+    // Mark that the client has now sent the USER command
+    client.setHasUserCommand(true);
+    // If the client has already sent the NICK command too...
+    if (client.hasNickCommand()) {
+        // ...consider the client fully registered on the server
+        client.setRegistered(true);
+        // Send a welcome message (usually numeric replies like 001, 002, etc.)
+        sendWelcomeMessage(client);
+    }
+}*/
+
+//USER guest 0 * :Ronnie Reagan
+//USER <username> <hostname> <servername> <parasite arg>:<realname>
+
+// Parameters: <username> 0 * <realname>
+/* "guest" — username (not necessarily unique)
+std::string username = "guest";
+
+// "0" — hostname (can be ignored; used in the past to identify client/host)
+std::string hostname = "0";
+
+// "*" — servername (usually ignored; the server replaces this with its actual name)
+std::string servername = "*";
+
+// ":Ronnie Reagan" — real name of the user (everything after the colon is the full real name)
+std::string realname = "Ronnie Reagan";*/
+
+/*if (client.hasNickCommand()):
+Checks if the client already sent the NICK command earlier.
+
+client.setRegistered(true);:
+Marks the client as fully registered (ready to join channels, send messages, etc.).
+
+sendWelcomeMessage(client);:
+Sends the welcome message (usually numeric replies 001–004 in IRC) to the client as confirmation of successful login/registration.*/

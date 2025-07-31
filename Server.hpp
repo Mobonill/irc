@@ -6,7 +6,7 @@
 /*   By: zserobia <zserobia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/15 16:10:39 by zserobia         ###   ########.fr       */
+/*   Updated: 2025/07/31 18:52:45 by zserobia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ class Server {
 		bool _signal;
 		int _clientsNumber;
 		int _max_fd;
+		std::time_t _creationTime;
     
     public:
 		Server(int port, const std::string &password);
@@ -90,7 +91,7 @@ class Server {
     int findClientFdByNick(const std::string& nick) const;
     Client* getClientOrSendError(int fd);
     void executeKick(Channel& channel, Client& kicker, int targetFd, const std::string& targetNick, const std::string& channelName);
-    
+    std::string getServerCreationDate();
 
 	void checkMode(int fd, const std::string &cmd);
     bool processModeChange(int fd, const std::vector<std::string> &tokens, Channel &channel, Client &client, const std::string &target);

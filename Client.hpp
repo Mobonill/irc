@@ -6,7 +6,7 @@
 /*   By: zserobia <zserobia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 23:15:57 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/15 16:22:08 by zserobia         ###   ########.fr       */
+/*   Updated: 2025/07/31 14:27:35 by zserobia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,4 +97,6 @@ public:
 		void setHasNickCommand(bool val);
 		bool isRegistered() const;
 		void setRegistered(bool val);
+
+		const std::string &getHostName() const;
 };
