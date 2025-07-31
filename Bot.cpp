@@ -3,14 +3,11 @@
 Bot::Bot() : _access_token(""), _isactive(false), _server(NULL)
 {
 	_ip = "localghost2";
-	// _nickname = "ጋ-ርዐጋቹዪ";
-	_nickname = "nickname2";
+	_nickname = "ጋ-ርዐጋቹዪ";
 	_username = "bot2";
 	_servername = "loco2";
-	// _hostname = "d̵̷̰̫̮͙̝̟͖͇̞ͭ͆̐̔̾̋͐̿̔̋̑̀͋̈̾̈́ͨͨͣ̆̊̑̕̕͡͝͞ͅ-̸̢͙̰̞̮͙̦̥̤͙ͮ̉̂͒̓̇͌̐ͩ̋̒̀̒̆̂͊̒̽̍͐͟͢͟͢ͅc̨̧͚̫̲̭̮͉̀́̃̊ͨ͘͟͞ͅo̵̴̰̳͉̤̯̦͉̼͖̤̠͓ͩ̎̒ͩ̓ͭͪ̋̀ͬ̐̉ͦ͋̇ͫ̆͗̾͊d̶̸̴̸̨̧̡̡̹̫̩̲̼̯̮̮̺̺̑̆ͧ͌̾̒̅̓ͬ̆̊̊̓́ͬ̓ͭ̃͗̔̃͒̾ͨͨͯ͡͞͝e̷̝̺̞̤̫̪̗̬͚̼̜ͥͥ̌̋ͨͯ̄́̿ͩ̊ͪ̓̾̔̊ͬͧ̕͝͠r͓";
-	// _realname = "ጋ-ርዐጋቹዪ";
-	_hostname = "hostname2";
-	_realname = "realname2";
+	_hostname = "d̵̷̰̫̮͙̝̟͖͇̞ͭ͆̐̔̾̋͐̿̔̋̑̀͋̈̾̈́ͨͨͣ̆̊̑̕̕͡͝͞ͅ-̸̢͙̰̞̮͙̦̥̤͙ͮ̉̂͒̓̇͌̐ͩ̋̒̀̒̆̂͊̒̽̍͐͟͢͟͢ͅc̨̧͚̫̲̭̮͉̀́̃̊ͨ͘͟͞ͅo̵̴̰̳͉̤̯̦͉̼͖̤̠͓ͩ̎̒ͩ̓ͭͪ̋̀ͬ̐̉ͦ͋̇ͫ̆͗̾͊d̶̸̴̸̨̧̡̡̹̫̩̲̼̯̮̮̺̺̑̆ͧ͌̾̒̅̓ͬ̆̊̊̓́ͬ̓ͭ̃͗̔̃͒̾ͨͨͯ͡͞͝e̷̝̺̞̤̫̪̗̬͚̼̜ͥͥ̌̋ͨͯ̄́̿ͩ̊ͪ̓̾̔̊ͬͧ̕͝͠r͓";
+	_realname = "ጋ-ርዐጋቹዪ";
 	_socket = BOT_FD;
 	_status = REGISTRD;
 	loadOAuthConfig();
@@ -19,14 +16,11 @@ Bot::Bot() : _access_token(""), _isactive(false), _server(NULL)
 Bot::Bot(Server *server) : _access_token(""), _isactive(false), _server(server)
 {
 	_ip = "localghost";
-	// _nickname = "ጋ-ርዐጋቹዪ";
-	_nickname = "nickname";
+	_nickname = "ጋ-ርዐጋቹዪ";
 	_username = "bot";
 	_servername = "loco";
-	// _hostname = "d̵̷̰̫̮͙̝̟͖͇̞ͭ͆̐̔̾̋͐̿̔̋̑̀͋̈̾̈́ͨͨͣ̆̊̑̕̕͡͝͞ͅ-̸̢͙̰̞̮͙̦̥̤͙ͮ̉̂͒̓̇͌̐ͩ̋̒̀̒̆̂͊̒̽̍͐͟͢͟͢ͅc̨̧͚̫̲̭̮͉̀́̃̊ͨ͘͟͞ͅo̵̴̰̳͉̤̯̦͉̼͖̤̠͓ͩ̎̒ͩ̓ͭͪ̋̀ͬ̐̉ͦ͋̇ͫ̆͗̾͊d̶̸̴̸̨̧̡̡̹̫̩̲̼̯̮̮̺̺̑̆ͧ͌̾̒̅̓ͬ̆̊̊̓́ͬ̓ͭ̃͗̔̃͒̾ͨͨͯ͡͞͝e̷̝̺̞̤̫̪̗̬͚̼̜ͥͥ̌̋ͨͯ̄́̿ͩ̊ͪ̓̾̔̊ͬͧ̕͝͠r͓";
-	// _realname = "ጋ-ርዐጋቹዪ";
-	_hostname = "hostname";
-	_realname = "realname";
+	_hostname = "42 d̵̷̰̫̮͙̝̟͖͇̞ͭ͆̐̔̾̋͐̿̔̋̑̀͋̈̾̈́ͨͨͣ̆̊̑̕̕͡͝͞ͅ-̸̢͙̰̞̮͙̦̥̤͙ͮ̉̂͒̓̇͌̐ͩ̋̒̀̒̆̂͊̒̽̍͐͟͢͟͢ͅc̨̧͚̫̲̭̮͉̀́̃̊ͨ͘͟͞ͅo̵̴̰̳͉̤̯̦͉̼͖̤̠͓ͩ̎̒ͩ̓ͭͪ̋̀ͬ̐̉ͦ͋̇ͫ̆͗̾͊d̶̸̴̸̨̧̡̡̹̫̩̲̼̯̮̮̺̺̑̆ͧ͌̾̒̅̓ͬ̆̊̊̓́ͬ̓ͭ̃͗̔̃͒̾ͨͨͯ͡͞͝e̷̝̺̞̤̫̪̗̬͚̼̜ͥͥ̌̋ͨͯ̄́̿ͩ̊ͪ̓̾̔̊ͬͧ̕͝͠r͓ 42";
+	_realname = "ꨄ︎ ጋ-ርዐጋቹዪ ꨄ︎";
 	_socket = BOT_FD;
 	_status = REGISTRD;
 	loadOAuthConfig();
@@ -165,10 +159,15 @@ bool Bot::isActive() const { return _isactive; }
 
 int Bot::getBotFd() const { return BOT_FD; }
 
-const std::string Bot::getFullAddress() const
+void Bot::echoClientMessage(std::string &msg, const std::string &full_client_name, int client_fd)
 {
-	std::string bot_address = COLOR + PINK + std::string(":") + _nickname + RST + "!" + _username +  "@" + _ip;
-	return bot_address;
+	std::string client_echo_msg;
+
+	if (msg.empty())
+		return ;
+	client_echo_msg = full_client_name + " PRIVMSG " + _nickname + " " + msg + END;
+	std::cout << "Echoing client message: [" << client_echo_msg << "]" << std::endl;
+	send(client_fd, client_echo_msg.c_str(), client_echo_msg.size(), 0);
 }
 
 // Bot conversation methods
@@ -186,6 +185,8 @@ const std::string &client_nick, const std::string & channel_name, bool in_channe
 	std::cout << "- before ifs\n";
 	if (!_server)
 		return ;
+	if (!_isactive)
+		createBotClient();
 	if (channel_name.empty())
 	{
 		std::cout << "-- no channel == don't care\n";

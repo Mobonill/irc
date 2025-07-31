@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "BotMsg.hpp"
 
 // Bot service interface (controlled access)
 bool	Server::createBotClient(int bot_fd)
@@ -21,7 +22,7 @@ bool	Server::createBotClient(int bot_fd)
 const std::string Server::botMsg(const std::string &cmd, const std::string &recipient, const std::string &msg)
 {
 	std::string full_msg;
-	if (!msg.empty())
+	if (msg.empty())
 		full_msg = std::string(":") + _bot->getFullAddress() + cmd + recipient + botEnd;
 	else
 		full_msg = std::string(":") + _bot->getFullAddress() + cmd + recipient + " :" + msg + botEnd;
@@ -151,5 +152,15 @@ void	Server::setClientBotStep(int client_fd, int step)
 	{
 		this_client->second.setBotConvStep(step);
 		return ;
+	}
+}
+
+void	Server::activateBot()
+{
+	if (_bot && !_bot->isActive())
+	{
+		std::cout << "Activating Bot...\n";
+		_bot->createBotClient();
+		std::cout << "Bot active status: " << _bot->isActive() << std::endl;
 	}
 }

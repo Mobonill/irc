@@ -41,12 +41,11 @@ class Bot : public Connexion
 
 		bool isActive() const;
 		int getBotFd() const;
-		
-		const std::string getFullAddress() const;
 
 		// Bot conversation methods
 		void handleConversation(int client_fd, const std::string &msg,\
 		const std::string &client_nick, const std::string & channel_name, bool in_channel);
+		void echoClientMessage(std::string &msg, const std::string &full_client_name, int client_fd);
 
 		void stepIllegalCommand(const int &client_fd, const std::string &nick);
 		void stepUninvitedChannel(const int &client_fd, const std::string &nick, const std::string &illegal_channel);

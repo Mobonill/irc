@@ -22,6 +22,13 @@ const std::string &Connexion::getIp() const { return _ip; }
 
 const int &Connexion::getStatus() const { return _status; }
 
+const std::string Connexion::getFullAddress() const
+{
+	std::string full_address = std::string(":") + _nickname + "!" + _username +  "@" + _ip;
+	std::cout << "Use of getFullAdd() = [" << full_address << "]\n";
+	return full_address;
+}
+
 const std::map<std::string, Channel> &Connexion::getJoinedChannels() const { return _joined_channels; }
 
 void Connexion::addJoinedChannel(const std::string &channel_name, const Channel &new_channel)

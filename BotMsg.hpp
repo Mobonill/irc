@@ -7,7 +7,7 @@
 #define botInstruction2 "[BOT]"
 #define botInstruction3 " or "
 #define botInstruction4 "[BOT :insert message here]"
-#define botInstruction5 ", for a private one-on-one conversation \nor "
+#define botInstruction5 ", for a private one-on-one conversation or "
 #define botInstruction6 "[BOT #channel_name_here :insert message here]"
 #define botInstruction7 ", to follow conversation in channel"
 
@@ -20,7 +20,7 @@
 #define botChanNoAccess3 " illegally, not with me i don't have paper, no money"
 
 #define bot0Call1 " Who wakes me from my slumber ?...aaahh i see ya "
-#define bot0Call2 "\nummm...there's a lot to tell"
+#define bot0Call2 "ummm...there's a lot to tell"
 
 #define bot1Call1 " Tell me "
 #define bot1Call2 ", do you wish to converse with me?"
@@ -28,7 +28,7 @@
 #define bot2Call1 " Play with me, "
 #define bot2Call2 " and i will tell you something interesting"
 
-#define botWarning0 " Warning : i may be discussing with some occult forces on the great web, \
+#define botWarning0 "Warning : i may be discussing with some occult forces on the great web, \
 but i promise to not spill any of your secrets, anything that tells about you, \
 everything stays anonymous of course"
 
@@ -36,9 +36,9 @@ everything stays anonymous of course"
 
 #define botAccept "This is me me me ⊂(灬ˊ🧿 🧿 🧿ˋ灬)⊃"
 
-#define botSerious "talking about you"
+#define botLogin1 "Talking about you "
 
-#define botLogin "You seem to have a great attachment to numbers, i see 42...\n\
+#define botLogin2 ", you seem to have a great attachment to numbers, i see 42...\
 if you can tell me more about you, first will you introduce me your login:"
 
 #define botWarning1 "Warning: all infos are stored locally and erased when the server is closed."

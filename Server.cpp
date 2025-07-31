@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:17 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/29 11:35:29 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/29 15:08:55 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ Server::Server(int port, const std::string &password): _port(port), _password(pa
 	#if BONUS
 	 std::cout << "Creating Bot with server pointer: " << this << std::endl;
 	 _bot = new Bot(this);
-	//  _bot_active = false;
 	 std::cout << "Bot created successfully" << std::endl;
 	#endif
 }
@@ -108,6 +107,10 @@ void Server::createServer(void)
 		throw std::runtime_error("Failed to set socket non-blocking");
 
 	std::cout << "Server created and listening on port " << _port << std::endl;
+	 #if BONUS
+	// Activate bot after server is ready
+	activateBot();
+	#endif
 }
 
 void Server::socketChecker()
@@ -241,12 +244,12 @@ void Server::parseCommands(int fd, const std::string &line)
 		split_cmdline.back() += endspaces;
 	if (!msg.empty())
 		split_cmdline.push_back(msg);
-	std::string cmds_array[] = {"VERSION","STATUS","PASS","NICK","USER","JOIN","TOPIC","KICK","MODE","INFO","INVITE","PRIVMSG"};
+	std::string cmds_array[] = { "VERSION","STATUS","PASS","NICK","USER","JOIN","TOPIC","KICK","MODE","INFO","INVITE","PRIVMSG" };
 	std::set<std::string> cmds_catalog(cmds_array, cmds_array + sizeof(cmds_array) / sizeof(std::string));
 	#if BONUS
-	 cmds_catalog.insert("BOT");
-	//  std::string bonus_cmds[] = { "BOT", "OTHER BONUS COMMAND HERE" };//for multiple bonus command if needed
-	//  cmds_catalog.insert(bonus_cmds, bonus_cmds + sizeof(bonus_cmds) / sizeof(std::string));
+	//  cmds_catalog.insert("BOT");
+	 std::string bonus_cmds[] = { "BOT","SERVER","COLOR" };//for multiple bonus command if needed
+	 cmds_catalog.insert(bonus_cmds, bonus_cmds + sizeof(bonus_cmds) / sizeof(std::string));
 	#endif
 	std::cout << "split_cmdline.size() = [" << split_cmdline.size() << "]\n";//DEBUG lines
 	for (std::vector<std::string>::iterator vit = split_cmdline.begin(); vit != split_cmdline.end(); ++vit)//DEBUG lines
@@ -261,11 +264,7 @@ void Server::handleCommands(int fd, const std::vector<std::string> &command)
 {
 	int status = _clients[fd].getStatus();
 
-	if (command[0] == "VERSION")
-		checkVersion();
-	else if (command[0] == "STATUS")
-		checkStatus(fd);
-	else if (status >= NOT_AUTHENTCATD && command[0] == "PASS") //store the password
+	if (status >= NOT_AUTHENTCATD && command[0] == "PASS") //store the password
 		checkPass(command, fd);
 	else if (status >= NOT_REGISTRD && command[0] == "NICK") //set the nickname
 		checkNick(command, fd);
@@ -292,8 +291,16 @@ void Server::handleCommands(int fd, const std::vector<std::string> &command)
 	else if (status >= REGISTRD && command[0] == "PRIVMSG") // Lulu //target a specific channel(room) and send a message to all other clients
 		checkPrivmsg(command, fd);
 	#if BONUS
+	else if (command[0] == "VERSION")
+		checkVersion();
+	else if (command[0] == "STATUS")
+		checkStatus(fd);
 	else if (status >= REGISTRD && command[0] == "BOT") // Lulu
 		checkBot(command, fd);
+	else if (command[0] == "SERVER")
+		checkServer(command, fd);
+	else if (command[0] == "COLOR")
+		checkColor(fd);
 	#endif
 	else
 		sendServerMessage(fd, "451", ":You have not registered");

@@ -4,6 +4,7 @@
 #include <map>
 #include <vector>
 #include <ctime>
+#include <iostream>
 
 class Channel;
 
@@ -44,6 +45,7 @@ class Connexion
 		int getSocket() const;
 		const std::string &getIp() const;
 		const int &getStatus() const;
+		const std::string getFullAddress() const;
 		const std::map<std::string, Channel> &getJoinedChannels() const;
 		void addJoinedChannel(const std::string &channel_name, const Channel &new_channel);
 };

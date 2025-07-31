@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 15:36:07 by lchauffo          #+#    #+#             */
-/*   Updated: 2025/07/29 11:31:18 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/31 15:38:58 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,13 +44,15 @@ void	Server::checkPass(const std::vector<std::string> &pass, int client_fd)
 		return sendServerMessage(client_fd, "461", "PASS :Not enough parameters");
 	else if (pass.size() > 2)
 		return sendServerMessage(client_fd, "461", "PASS :Too many parameters");
-	else if (_clients[client_fd].getAuthenticated() == true)
+	else if (_clients[client_fd].getAuthenticated())
 		return sendServerMessage(client_fd, "462", "PASS :You may not reregister");
 	else if (pass[1].size() > 128) //OWASP Authentication Cheat Sheet, can be down to 64 chars
 		return sendServerMessage(client_fd, "464", "PASS :Password incorrect");
-	else if ((pass[1][0] == ':' &&  _password.compare(&pass[1][1]) != 0))
+	else if (_password[0] == ':' && !((_password.compare(pass[1]) == 0 || (pass[1][0] == ':' && _password.compare(&pass[1][1]) == 0))))
 		return sendServerMessage(client_fd, "464", "PASS :Password incorrect");
-	else if (pass[1][0] != ':' && pass[1].compare(_password) != 0)
+	else if (pass[1][0] == ':' && _password[0] != ':' && _password.compare(&pass[1][1]) != 0)
+		return sendServerMessage(client_fd, "464", "PASS :Password incorrect");
+	else if (pass[1][0] != ':' && _password[0] != ':' && _password.compare(pass[1]) != 0)
 		return sendServerMessage(client_fd, "464", "PASS :Password incorrect");
 	else
 	{
@@ -214,10 +216,35 @@ void	Server::checkPrivmsg(const std::vector<std::string> &priv, int client_fd)//
 		return sendServerMessage(client_fd, "411", "PRIVMSG :No recipient given");
 	else if (priv.size() < 3 || priv[2][0] != ':')
 		return sendServerMessage(client_fd, "412", "PRIVMSG :No text to send");
+	#if BONUS
+	if (_bot && (priv[1] == _bot->getNickName() || priv[1] == "D-CODER" || priv[1] == "BOT"))
+	{
+		std::cout << "DEBUG: PRIVMSG directed to bot [" << priv[1] << "]" << std::endl;
+		std::string client_nick = _clients[client_fd].getNickName();
+		std::string bot_msg = priv[2];
+		_bot->handleConversation(client_fd, bot_msg, client_nick, "", false);
+		return ;
+	}
+	if (priv[1][0] == '#')
+	{
+		std::string msg_content = priv[2];
+		if (summonBot(msg_content))
+		{
+			std::cout << "DEBUG: Bot summoned via keywords in channel [" << priv[1] << "]" << std::endl;
+			std::string client_nick = _clients[client_fd].getNickName();
+			_clients[client_fd].setBotConvStep(1);
+			_bot->handleConversation(client_fd, msg_content, client_nick, priv[1], true);
+		}
+		privToChannel(priv, client_fd);
+	}
+	else
+		privToClient(priv, client_fd);
+	#else
 	if (priv[1][0] == '#')
 		privToChannel(priv, client_fd);
 	else
 		privToClient(priv, client_fd);
+	#endif
 }
 
 bool summonBot(const std::string &msg)//check the presence of one summon_expression in a message to initiate a bot conversation
@@ -232,10 +259,23 @@ bool summonBot(const std::string &msg)//check the presence of one summon_express
 			return true;
 	return false;
 }
+
 #if BONUS
+// void	echoClientMessage(std::string &msg, const std::string &full_client_name, const std::string &target, int client_fd)
+// {
+// 	std::string client_echo_msg;
+
+// 	if (msg.empty())
+// 		return ;
+// 	client_echo_msg = full_client_name + " PRIVMSG " + target + " " + msg + END;
+// 	std::cout << "Echoing client message: [" << client_echo_msg << "]" << std::endl;
+// 	send(client_fd, client_echo_msg.c_str(), client_echo_msg.size(), 0);
+// }
+
 void	Server::checkBot(const std::vector<std::string> &bot, int client_fd)//Lulu
 {
 	std::cout << "DEBUG: checkBot called with " << bot.size() << " parameters" << std::endl;
+	std::cout << "DEBUG: Bot active? " << _bot->isActive() << std::endl;
 
 	bool in_channel = false;
 	std::string channel_name = "";
@@ -259,14 +299,61 @@ void	Server::checkBot(const std::vector<std::string> &bot, int client_fd)//Lulu
 	std::cout << "- after ifs\n";
 	std::cout << "- channel_name = [" << channel_name << "]\n";
 	std::cout << "- msg = [" << msg << "]\n";
+	
 	std::map<int, Client>::iterator this_client = _clients.find(client_fd);
 	if (this_client != _clients.end())
 		client_name = this_client->second.getNickName();
 	std::cout << "- client_name = [" << client_name << "]\n";
+
+	// if (channel_name[0] == '#' || channel_name[0] == '&')
+	// 	echoClientMessage(msg, this_client->second.getFullAddress(), channel_name, client_fd);
+	// else
+	// 	echoClientMessage(msg, this_client->second.getFullAddress(), _bot->getNickName(), client_fd);
+	
 	_bot->handleConversation(client_fd, msg, client_name, channel_name, in_channel);
 
 	std::cout << "end of function checkBot()\n";
 }
+
+void	Server::checkServer(const std::vector<std::string> &serv, int client_fd)
+{
+	if (serv.size() < 2)
+		return sendServerMessage(client_fd, "461", "SERVER :Not enough parameters");
+	else if (serv.size() > 2)
+		return sendServerMessage(client_fd, "461", "SERVER :Too many parameters");
+	else if (serv[1].size() > 32) //
+		return sendServerMessage(client_fd, "464", "SERVER :Erroneus ServerName");//432?
+	else
+	{
+		for (size_t i = 0; i < serv[1].size(); ++i)
+			if (!std::isalnum(serv[1][i]))
+				return sendServerMessage(client_fd, "464", "SERVER :Erroneus ServerName");
+		setServerName(serv[1]);
+		std::cout << "Client " << client_fd << " authenticated successfully." << std::endl;
+	}
+	return ;
+}
+
+void Server::checkColor(int client_fd)
+{
+	sendServerMessage(client_fd, "42", WHT + "WHT");
+	sendServerMessage(client_fd, "42", BLK + "BLK");
+	sendServerMessage(client_fd, "42", BLU + "BLU");
+	sendServerMessage(client_fd, "42", GRN + "GRN");
+	sendServerMessage(client_fd, "42", RED + "RED");
+	sendServerMessage(client_fd, "42", BRW + "BRW");
+	sendServerMessage(client_fd, "42", PPL + "PPL");
+	sendServerMessage(client_fd, "42", ORG + "ORG");
+	sendServerMessage(client_fd, "42", YLW + "YLW");
+	sendServerMessage(client_fd, "42", LGN + "LGN");
+	sendServerMessage(client_fd, "42", CYN + "CYN");
+	sendServerMessage(client_fd, "42", LCY + "LCY");
+	sendServerMessage(client_fd, "42", LBU + "LBU");
+	sendServerMessage(client_fd, "42", PNK + "PNK");
+	sendServerMessage(client_fd, "42", GRY + "GRY");
+	sendServerMessage(client_fd, "42", LGY + "LGY");
+}
 #endif
+
 
 // 16/9 / 1080p / 60img/sec / use printsc / loop / son ok

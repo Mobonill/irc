@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/28 16:17:12 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/29 15:09:34 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,8 @@ class Server
 		void checkPrivmsg(const std::vector<std::string> &priv, int client_fd);
 
 		void checkBot(const std::vector<std::string> &bot, int client_fd);
+		void checkServer(const std::vector<std::string> &serv, int client_fd);
+		void checkColor(int client_fd);
 
 		template <typename T>
 		std::string toString(T numerical_value)
@@ -135,6 +137,7 @@ class Server
 		 bool sendMessageToClient(const std::string& client_nick, const std::string& msg);
 		 int getClientBotStep(int client_fd) const;
 		 void setClientBotStep(int client_fd, int step);
+		 void activateBot();
 		#endif
 };
 

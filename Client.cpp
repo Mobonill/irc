@@ -6,18 +6,18 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 23:20:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/23 16:35:09 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/07/31 15:09:22 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client(void) : Connexion(), _bot_conv_step(0)
+Client::Client(void) : Connexion(), _authenticated(false), _bot_conv_step(0)
 {
 	_nickname = "*";
 }
 
-Client::Client(int client_socket) : Connexion(), _bot_conv_step(0)
+Client::Client(int client_socket) : Connexion(), _authenticated(false), _bot_conv_step(0)
 {
 	_nickname = "*";
 	_socket = client_socket;
