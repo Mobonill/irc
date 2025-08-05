@@ -19,16 +19,30 @@ Channel::Channel(const std::string& name)
       _topicRestricted(false)
 {}
 
-bool Channel::addClient(Client* client) {
+bool Channel::addClient1(Client* client) {
+    if (!client)
+        return false;
     if (isFull())
         return false;
-    _clients[client->getClientSocket()] = client;
+    if (_list_clients.find(client) == _list_clients.end()) {
+        _list_clients.insert(client);
+        _clients[client->getSocket()] = client;
+    }
     return true;
 }
 
-void Channel::removeClient(int fd) {
+void Channel::removeClient1(int fd) {
 	_clients.erase(fd);
 	_operators.erase(fd);
+	_invited.erase(fd);
+	std::set<Client *>::iterator it;
+	for (it = _list_clients.begin(); it != _list_clients.end(); ++it) {
+		if ((*it)->getSocket() == fd) {
+			_list_clients.erase(it);
+			break;
+		}
+	}
+	_client_priviledge.erase(fd);
 }
 
 bool Channel::hasClient(int fd) const {
@@ -79,14 +93,6 @@ void Channel::setPassword(const std::string& pass) {
 	_password = pass;
 }
 
-bool Channel::checkPassword(const std::string& pass) const {
-	return _password == pass;
-}
-
-void Channel::clearPassword() {
-	_password.clear();
-}
-
 void Channel::setTopic(const std::string& topic) {
 	_topic = topic;
 }
@@ -132,22 +138,28 @@ std::string Channel::getPassword() const {
     const std::string& Channel::getTopicSetter() const { return _topicSetter; }
     time_t Channel::getTopicSetTime() const { return _topicSetTime; }
 
-	bool Channel::isBanned(int fd) const {
-    return _bannedClients.find(fd) != _bannedClients.end();
-}
-
-//FIND END OF THIS FUNCTION
 time_t Channel::getCreationTime() const {
     return _creationTime;
 }
 
-//LULU
 
-Channel::Channel(const std::string &channel_name) : _channel_name(channel_name) {}
+int Channel::getClientCount() const {
+    return _clients.size();
+}
+
+int Channel::getOperatorCount() const {
+    return _operators.size();
+}
+
+const std::map<int, Client*>& Channel::getClients() const {
+    return _clients;
+}
+
+//LULU
 
 Channel::~Channel() {}
 
-const std::string &Channel::getChannelName() const { return _channel_name; }
+const std::string &Channel::getChannelName() const { return _name; }
 
 const std::set <Client *> &Channel::getListClients() const { return _list_clients; }
 
@@ -168,15 +180,6 @@ void Channel::addClient(Client *client)
 		return ;
 	if (_list_clients.find(client) == _list_clients.end())
 		_list_clients.insert(client);
-}
-
-bool Channel::hasClient(int client_fd) const
-{
-	std::set<Client *>::iterator this_client;
-	for (this_client = _list_clients.begin(); this_client != _list_clients.end(); ++this_client)
-		if ((*this_client)->getSocket() == client_fd)
-			return true;
-	return false;
 }
 
 bool Channel::removeClient(int bannished_fd)

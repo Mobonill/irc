@@ -79,6 +79,8 @@ void	Server::checkNick(const std::vector<std::string> &nick, int client_fd)
 				return sendServerMessage(client_fd, "433", "NICK :Nickname is already in use");
 		std::string old_nick = _clients[client_fd].getNickName();
 		_clients[client_fd].setNickName(nick[1]);
+
+		_clients[client_fd].setHasNickCommand(true); //Zara add
 		if (old_nick == "*")
 		{
 			std::cout << "Introducing new nick \"" << _clients[client_fd].getNickName() << "\"." << std::endl;
@@ -95,12 +97,14 @@ void	Server::checkNick(const std::vector<std::string> &nick, int client_fd)
 			sendMsgListClients(nick, same_channels_clients, client_fd, msg);
 		}
 	}
+
+	tryFinishRegistration(_clients[client_fd]); //Zara add
 }
 
 // input a name to make a guest an actual client
 // ERR_NEEDMOREPARAMS              ERR_ALREADYREGISTRED
 // Parameters: <username> <hostname> <servername> <realname>
-void	Server::checkUser(const std::vector<std::string> &user, int client_fd)//Zara this is a fake version just for testing
+/*void	Server::checkUser(const std::vector<std::string> &user, int client_fd)//Zara this is a fake version just for testing
 {
 	for (std::vector<std::string>::const_iterator vit = user.begin(); vit != user.end(); ++vit)
 		std::cout << *vit << std::endl;
@@ -110,7 +114,7 @@ void	Server::checkUser(const std::vector<std::string> &user, int client_fd)//Zar
 	_clients[client_fd].setRealName("lucie");
 	if (_clients[client_fd].getNickName() != "*")
 		_clients[client_fd].setStatus(REGISTRD);
-}
+}*/
 
 // JOIN #[name of channel here]
 // can't start any discussion if no channel created, even a general one

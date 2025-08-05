@@ -94,45 +94,39 @@ class Server
 		void stopSignal();
 		void clearClient(int client_fd);
 		void parseMessage(int client_fd, const std::string &msg);
-		void parseAndExecute(int client_fd, std::string line);
-		void handleCommands(int fd, const std::vector<std::string> &vectorCmd);
+		void parseAndExecute(int client_fd, std::string line); //maybe delete?
+
+
+		
 		void sendError(int client_fd, const std::string &errorMsg);
-		void checkPass(int client_fd, const std::string &cmd);
-		void checkNick(int client_fd, const std::string &cmd);
-		    // ❗ Добавь эту строку:
-    bool isAuthenticated(int fd);
+		bool isAuthenticated(int fd);
+		void checkInvite(const std::vector<std::string> &command, int fd);
+		void checkTopic(const std::vector<std::string> &command, int fd);
 
-    // остальные методы
-   // void checkJoin(int fd, const std::string &cmd);
-    void checkInvite(int fd, const std::string &cmd);
-    void checkTopic(int fd, const std::string &cmd);
+		int getClientFdByNick(const std::string& nick);
+		
+		void checkJoin(const std::vector<std::string> &command, int fd);
+		void handleJoinZero(int fd);
+		void handleJoinChannels(int fd, const std::vector<std::string> &tokens);
+		Channel& getOrCreateChannel(const std::string &channelName, int fd);
+		void handleSingleChannelJoin(int fd, Client &client, const std::string &channelName, const std::string &providedKey);
+		void sendJoinMessages(int fd, Client &client, Channel &channel);
 
-	int getClientFdByNick(const std::string& nick);
-	
+		void checkKick(const std::vector<std::string> &command, int fd);
+		Channel* getChannelOrSendError(int fd, const std::string& channelName);
+		int findClientFdByNick(const std::string& nick) const;
+		Client* getClientOrSendError(int fd);
+		void executeKick(Channel& channel, Client& kicker, int targetFd, const std::string& targetNick, const std::string& channelName, const std::string& reason);
+		std::string getServerCreationDate();
 
-	void checkJoin(int fd, const std::string &cmd);
-	void handleJoinZero(int fd);
-	void handleJoinChannels(int fd, const std::vector<std::string> &tokens);
-	Channel& getOrCreateChannel(const std::string &channelName, int fd);
-	void handleSingleChannelJoin(int fd, Client &client, const std::string &channelName, const std::string &providedKey);
-	void sendJoinMessages(int fd, Client &client, Channel &channel);
+		void checkMode(const std::vector<std::string> &command, int fd);
+		bool processModeChange(int fd, const std::vector<std::string> &tokens, Channel &channel, Client &client, const std::string &target);
+		void sendCurrentModes(int fd, Client &client, Channel &channel, const std::string &target);
+		bool isValidChannelName1(const std::string& channelName);
 
-	void checkKick(int fd, const std::string &cmd);
-	Channel* getChannelOrSendError(int fd, const std::string& channelName);
-    int findClientFdByNick(const std::string& nick) const;
-    Client* getClientOrSendError(int fd);
-    void executeKick(Channel& channel, Client& kicker, int targetFd, const std::string& targetNick, const std::string& channelName);
-    std::string getServerCreationDate();
-
-	void checkMode(int fd, const std::string &cmd);
-    bool processModeChange(int fd, const std::vector<std::string> &tokens, Channel &channel, Client &client, const std::string &target);
-    void sendCurrentModes(int fd, Client &client, Channel &channel, const std::string &target);
-	bool isValidChannelName1(const std::string& channelName);
-
-	void handlePrivmsg(int senderFd, const std::vector<std::string>& tokens);
-	void checkUser(int fd, const std::string& cmd);
-	void sendWelcomeMessage(Client& client);
-	void sendToClient(int fd, const std::string& message);
+		void sendWelcomeMessage(Client& client);
+		void sendToClient(int fd, const std::string& message);
+		void tryFinishRegistration(Client &client);
 
 	//LULU under
 	
@@ -147,6 +141,7 @@ class Server
 		void checkVersion();
 		void checkStatus(int client_fd);
 
+		void checkPass(int client_fd, const std::string &cmd); //maybe delete?
 		void checkPass(const std::vector<std::string> &pass, int client_fd);
 		void checkNick(const std::vector<std::string> &nick, int client_fd);
 

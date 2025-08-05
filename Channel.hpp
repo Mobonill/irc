@@ -32,27 +32,22 @@ private:
     std::map<int, Client*> _clients;
     std::set<int> _operators;
     std::set<int> _invited;
-    std::set<int> _bannedClients;
-
+   
     //LULU
-    std::string _channel_name;
-    int _user_limits;
-    std::string _topic;
-    std::string _password;
+
     std::map <int, std::string> _client_priviledge;
     std::set <Client *> _list_clients;
 
 public:
     Channel(const std::string& name);
 
-    bool addClient(Client* client);
-    void removeClient(int fd);
+    bool addClient1(Client* client);
+    void removeClient1(int fd);
     bool hasClient(int fd) const;
     bool isOperator(int fd) const;
     void promoteOperator(int fd);
     void demoteOperator(int fd);
-    bool isBanned(int fd) const;
-
+ 
     void setInviteOnly(bool state);
     bool getInviteOnly() const;
 
@@ -64,10 +59,8 @@ public:
     bool isFull() const;
 
     void setPassword(const std::string& pass);
-    bool checkPassword(const std::string& pass) const;
-    void clearPassword();
 
-    void setTopic(const std::string& topic);
+    void setTopic(const std::string& topic);//нужен?
     const std::string& getTopic() const;
     void setTopic(const std::string& topic, const std::string& setter);
     const std::string& getTopicSetter() const;
@@ -84,15 +77,16 @@ public:
     std::string getPassword() const;
     static bool isValidChannelName(const std::string& name);
     time_t getCreationTime() const;
+    int getClientCount() const;
+    int getOperatorCount() const;
+    const std::map<int, Client*>& getClients() const;
 
     //LULU
-    Channel(const std::string &channel_name);
     ~Channel();
     const std::string &getChannelName() const;
     const std::set <Client *> &getListClients() const;
     const std::map <int, std::string> &getAllClientPriviledge() const; // see if needed
     const std::string getClientPriviledge(int client_fd) const;
     void addClient(Client *client);
-    bool hasClient(int client_fd) const;
     bool removeClient(int bannished_fd);
 };

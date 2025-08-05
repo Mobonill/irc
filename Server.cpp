@@ -15,21 +15,19 @@
 #include "Server.hpp"
 #include "Utils.hpp"
 
-
-
-
 Server* g_signal = NULL;
-
+/*
 Server::Server(int port, const std::string &password): _port(port), _password(password), _socketFd(-1) {
     _clientsNumber = 0;
     _signal = false;
     _creationTime = std::time(NULL);
-}
+}*/ // maybe delete?
 
 Server::Server(int port, const std::string &password): _port(port), _password(password), _socket_fd(-1)
 {
 	_clients_number = 0;
 	_signal = false;
+	_creationTime = std::time(NULL); //Zara add
 	std::cout << "Server constructor: this = " << this << std::endl;
 	#if BONUS
 	 std::cout << "Creating Bot with server pointer: " << this << std::endl;
@@ -262,16 +260,16 @@ void Server::parseCommands(int fd, const std::string &line)
 	 std::string bonus_cmds[] = { "BOT","SERVER","COLOR" };//for multiple bonus command if needed
 	 cmds_catalog.insert(bonus_cmds, bonus_cmds + sizeof(bonus_cmds) / sizeof(std::string));
 	#endif
-	std::cout << "split_cmdline.size() = [" << split_cmdline.size() << "]\n";//DEBUG lines
-	for (std::vector<std::string>::iterator vit = split_cmdline.begin(); vit != split_cmdline.end(); ++vit)//DEBUG lines
-		std::cout << "-- *vit = [" << *vit << "]\n";//DEBUG lines - printing all arguments
+	//std::cout << "split_cmdline.size() = [" << split_cmdline.size() << "]\n";//DEBUG lines
+	//for (std::vector<std::string>::iterator vit = split_cmdline.begin(); vit != split_cmdline.end(); ++vit)//DEBUG lines
+	//	std::cout << "-- *vit = [" << *vit << "]\n";//DEBUG lines - printing all arguments
 	if (cmds_catalog.find(split_cmdline[0]) != cmds_catalog.end())
 			handleCommands(fd, split_cmdline);
 	else
 		sendServerMessage(fd, "421", split_cmdline[0] + " :Unknown command");
 }
 
-void Server::handleCommands(int fd, const std::vector<std::string> &command)
+/*void Server::handleCommands(int fd, const std::vector<std::string> &command)
 {
 	int status = _clients[fd].getStatus();
 
@@ -317,33 +315,35 @@ void Server::handleCommands(int fd, const std::vector<std::string> &command)
       std::cout << "-> Unknown command " << fd << " : " << vectorSpliter[0] << std::endl;
     
   }
-}
+}*/
+
 void Server::handleCommands(int fd, const std::vector<std::string> &command)
 {
+	int status = _clients[fd].getStatus(); //Zara add
 	if (status >= NOT_AUTHENTCATD && command[0] == "PASS") //store the password
 		checkPass(command, fd);
 	else if (status >= NOT_REGISTRD && command[0] == "NICK") //set the nickname
 		checkNick(command, fd);
 	else if (status >= NOT_REGISTRD && command[0] == "USER") //register user info
 		checkUser(command, fd);
-	// else if (status >= REGISTRD && command[0] == "JOIN") //demand access to a room(or create a new room and join it)
-	// {
-	// 	// checkJoin(fd, cmd);
-	// }
+	 else if (status >= REGISTRD && command[0] == "JOIN") //demand access to a room(or create a new room and join it)
+	{
+	 	checkJoin(command, fd);
+	}
 	else if (status >= REGISTRD && command[0] == "INFO") // Lulu
 		checkInfo(command, fd);
-	// else if (status >= IN_CHANNEL && command[0] == "TOPIC") {
-	// 	// checkTopic(fd, cmd);
-	// }
-	// else if (status >= IN_CHANNEL && command[0] == "KICK") {
-	// 	// checkKick(fd, cmd);
-	// }
-	// else if (status >= IN_CHANNEL && command[0] == "MODE") {
-	// 	// checkMode(fd, cmd);
-	// }
-	// else if (status >= IN_CHANNEL && command[0] == "INVITE") {
-	// 	// checkInvite(fd, cmd);
-	// }
+	 else if (status >= REGISTRD && command[0] == "TOPIC") {
+	 	 checkTopic(command, fd);
+	 }
+	 else if (status >= REGISTRD && command[0] == "KICK") {
+	 	 checkKick(command, fd);
+	 }
+	 else if (status >= REGISTRD && command[0] == "MODE") {
+	 	 checkMode(command, fd);
+	 }
+	 else if (status >= REGISTRD && command[0] == "INVITE") {
+	 	 checkInvite(command, fd);
+	 }
 	else if (status >= REGISTRD && command[0] == "PRIVMSG") // Lulu //target a specific channel(room) and send a message to all other clients
 		checkPrivmsg(command, fd);
 	#if BONUS//LULU
@@ -373,64 +373,16 @@ void Server::checkPass(int client_fd, const std::string &cmd)
     _clients[client_fd].setAuthenticated(true);
     std::cout << "Client " << client_fd << " authenticated successfully." << std::endl;
 }
+
+
 void Server::sendToClient(int fd, const std::string& message) {
     send(fd, message.c_str(), message.length(), 0);
 }
-/*
-void Server::sendWelcomeMessage(Client& client) {
-    std::string nick = client.getNickName();
-    int fd = client.getClientSocket();
 
-    sendToClient(fd, ":localhost 001 " + nick + " :Welcome to IRC\r\n");
-    sendToClient(fd, ":localhost 002 " + nick + " :Your host is localhost\r\n");
-    sendToClient(fd, ":localhost 003 " + nick + " :This server was created today\r\n");
-    sendToClient(fd, ":localhost 004 " + nick + " localhost 1.0 o o\r\n");
-}
-
-
-
-void Server::checkUser(int fd, const std::string& cmd) {
-    Client& client = _clients[fd];
-
-    if (client.hasUserCommand()) {
-        sendToClient(fd, ":localhost 462 * :You may not reregister\r\n");
-        return;
-    }
-
-    size_t colonPos = cmd.find(" :");
-    if (colonPos == std::string::npos) {
-        sendToClient(fd, ":localhost 461 * USER :Not enough parameters\r\n");
-        return;
-    }
-
-    std::string beforeColon = cmd.substr(0, colonPos);
-    std::string realname = cmd.substr(colonPos + 2); // skip " :"
-
-    std::istringstream iss(beforeColon);
-    std::string command, username, hostname, servername;
-    iss >> command >> username >> hostname >> servername;
-
-    if (username.empty() || hostname.empty() || servername.empty() || realname.empty()) {
-        sendToClient(fd, ":localhost 461 * USER :Not enough parameters\r\n");
-        return;
-    }
-
-        // (Optional) Add ~ prefix if ident is not used
-   // Set the client's username, adding a "~" prefix (common in IRC when ident is not verified)
-    client.setUserName("~" + username); // ~guest
-    // Set the client's hostname (sent as part of the USER command)
-    client.setHostName(hostname); // 0
-    // Set the server name provided by the client (may be ignored in many IRC servers)
-    client.setServerName(servername);  // *
-    // Set the real name (the part after the ':' in the USER command)
-    client.setRealName(realname); // Ronnie Reagan
-    // Mark that the client has now sent the USER command
-    client.setHasUserCommand(true);
-    // If the client has already sent the NICK command too...
-    if (client.hasNickCommand()) {
-        // ...consider the client fully registered on the server
+void Server::tryFinishRegistration(Client &client) {
+    if (client.hasNickCommand() && client.hasUserCommand() && !client.isRegistered()) {
         client.setRegistered(true);
-        // Send a welcome message (usually numeric replies like 001, 002, etc.)
+        client.setStatus(REGISTRD);
         sendWelcomeMessage(client);
-    }
-}*/
+}
+}
