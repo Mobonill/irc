@@ -6,6 +6,7 @@
 #include <vector>
 #include <ctime>
 #include <time.h>
+#include <list>
 
 // _ClientPriviledge
 // managing operator privileges, which allow certain users to kick 
@@ -28,8 +29,8 @@ private:
     int _userLimit;          // Max number of users allowed in the channel (+l mode)
     bool _inviteOnly;        // true if channel is invite-only (+i mode)
     bool _topicRestricted;   // true if only operators can change the topic (+t mode)
-
     std::map<int, Client*> _clients;
+    std::list<int> _clientsInOrder;
     std::set<int> _operators;
     std::set<int> _invited;
    
@@ -80,6 +81,8 @@ public:
     int getClientCount() const;
     int getOperatorCount() const;
     const std::map<int, Client*>& getClients() const;
+    const std::list<int>& getClientsInOrder() const;
+
 
     //LULU
     ~Channel();

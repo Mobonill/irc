@@ -6,7 +6,7 @@
 /*   By: zserobia <zserobia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/05 19:20:10 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/31 20:22:27 by zserobia         ###   ########.fr       */
+/*   Updated: 2025/08/06 17:52:47 by zserobia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ int main(int argc, char **argv) {
 	g_signal = &server;
 	signal(SIGINT, Server::handleSignal);
 	signal(SIGQUIT, Server::handleSignal);
+	signal(SIGPIPE, SIG_IGN); // Zara add
 	try {
 		server.createServer();
 		while(server.getSignal() == false)

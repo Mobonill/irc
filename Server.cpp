@@ -6,7 +6,7 @@
 /*   By: zserobia <zserobia@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:17 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/31 20:57:00 by zserobia         ###   ########.fr       */
+/*   Updated: 2025/08/06 17:42:29 by zserobia         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,6 +185,8 @@ bool Server::handleClientMessage(int client_fd)
 	if (bytes <= 0)
 	{
 		std::cout << "Client " << client_fd << " disconnected" << std::endl;
+		
+		handleJoinZero(client_fd);//Zara add
 		return (false);
 	}
 	else

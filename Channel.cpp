@@ -1,4 +1,4 @@
-// Channel.cpp
+
 #include "Channel.hpp"
 #include "Client.hpp"
 
@@ -27,6 +27,7 @@ bool Channel::addClient1(Client* client) {
     if (_list_clients.find(client) == _list_clients.end()) {
         _list_clients.insert(client);
         _clients[client->getSocket()] = client;
+		_clientsInOrder.push_back(client->getSocket());
     }
     return true;
 }
@@ -43,6 +44,7 @@ void Channel::removeClient1(int fd) {
 		}
 	}
 	_client_priviledge.erase(fd);
+	 _clientsInOrder.remove(fd);
 }
 
 bool Channel::hasClient(int fd) const {
@@ -151,8 +153,12 @@ int Channel::getOperatorCount() const {
     return _operators.size();
 }
 
-const std::map<int, Client*>& Channel::getClients() const {
+/*const std::map<int, Client*>& Channel::getClients() const {
     return _clients;
+}*/
+
+const std::list<int>& Channel::getClientsInOrder() const {
+    return _clientsInOrder;
 }
 
 //LULU
@@ -179,7 +185,11 @@ void Channel::addClient(Client *client)
 	if (client == NULL)
 		return ;
 	if (_list_clients.find(client) == _list_clients.end())
+	{
 		_list_clients.insert(client);
+		_clients[client->getSocket()] = client;
+		_clientsInOrder.push_back(client->getSocket());
+	}
 }
 
 bool Channel::removeClient(int bannished_fd)
@@ -192,5 +202,12 @@ bool Channel::removeClient(int bannished_fd)
 		return false;
 	_client_priviledge.erase(bannished_fd);
 	_list_clients.erase(bannished);
+
+		_clients.erase(bannished_fd);
+		_operators.erase(bannished_fd);
+		_invited.erase(bannished_fd);
+		_list_clients.erase(bannished);
+		_clientsInOrder.remove(bannished_fd);
 	return true;
 }
+
