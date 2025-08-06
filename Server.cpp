@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:17 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/29 15:08:55 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/08/04 13:18:31 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -223,7 +223,7 @@ void Server::parseCommands(int fd, const std::string &line)
 	if (line.empty())
 		return ;
 	size_t detect_msg = line.find(":");
-	if (detect_msg != std::string::npos)
+	if (detect_msg != std::string::npos && detect_msg > 0 && line[detect_msg - 1] == ' ')
 	{
 		msg = line.substr(detect_msg);
 		cmd_line = line.substr(0, detect_msg);
@@ -295,12 +295,34 @@ void Server::handleCommands(int fd, const std::vector<std::string> &command)
 		checkVersion();
 	else if (command[0] == "STATUS")
 		checkStatus(fd);
-	else if (status >= REGISTRD && command[0] == "BOT") // Lulu
-		checkBot(command, fd);
 	else if (command[0] == "SERVER")
 		checkServer(command, fd);
 	else if (command[0] == "COLOR")
 		checkColor(fd);
+	else if (status >= REGISTRD && command[0] == "BOT") // Lulu
+	{
+		// std::vector <std::string> echo_client_msg;
+		// echo_client_msg.push_back("PRIVMSG");
+		// echo_client_msg.push_back();
+		
+		std::vector <std::string> privmsg_bot_cmd;
+		privmsg_bot_cmd.push_back("PRIVMSG");
+		privmsg_bot_cmd.push_back(_bot->getNickName());
+		if (command.size() > 1)
+		{
+			for (std::vector<std::string>::const_iterator vit = command.begin()+1; vit != command.end(); ++vit)
+			{
+				std::cout << "what i push_back = [" << *vit << "]\n";
+				privmsg_bot_cmd.push_back(*vit);
+			}
+		}
+		else
+			privmsg_bot_cmd.push_back(":");
+		std::cout << "\\\\\\ Printing privmsg_bot_cmd:\n";
+		for (std::vector<std::string>::const_iterator vit = privmsg_bot_cmd.begin(); vit != privmsg_bot_cmd.end(); ++vit)
+			std::cout << "-- *bot = [" << *vit << "]\n";
+		checkPrivmsg(privmsg_bot_cmd, fd);
+	}
 	#endif
 	else
 		sendServerMessage(fd, "451", ":You have not registered");

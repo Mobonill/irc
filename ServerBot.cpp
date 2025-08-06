@@ -26,6 +26,7 @@ const std::string Server::botMsg(const std::string &cmd, const std::string &reci
 		full_msg = std::string(":") + _bot->getFullAddress() + cmd + recipient + botEnd;
 	else
 		full_msg = std::string(":") + _bot->getFullAddress() + cmd + recipient + " :" + msg + botEnd;
+	std::cout << "** full_msg = [" << full_msg << "]\n";
 	return full_msg;
 }
 
@@ -133,14 +134,9 @@ bool	Server::sendMessageToClient(const std::string& client_nick, const std::stri
 
 int	Server::getClientBotStep(int client_fd) const
 {
-	std::cout << "DEBUG: Server::getClientBotStep\n";
 	std::map<int, Client>::const_iterator this_client = _clients.find(client_fd);
-	std::cout << "- did it find this_client?\n";
 	if (this_client != _clients.end())
-	{
-		std::cout << "-- yes, it did\n";
 		return this_client->second.getBotConvStep();
-	}
 	else
 		return (0);
 }
@@ -158,9 +154,5 @@ void	Server::setClientBotStep(int client_fd, int step)
 void	Server::activateBot()
 {
 	if (_bot && !_bot->isActive())
-	{
-		std::cout << "Activating Bot...\n";
 		_bot->createBotClient();
-		std::cout << "Bot active status: " << _bot->isActive() << std::endl;
-	}
 }

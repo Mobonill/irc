@@ -24,7 +24,7 @@ const int &Connexion::getStatus() const { return _status; }
 
 const std::string Connexion::getFullAddress() const
 {
-	std::string full_address = std::string(":") + _nickname + "!" + _username +  "@" + _ip;
+	std::string full_address = _nickname + "!" + _username +  "@" + _ip;
 	std::cout << "Use of getFullAdd() = [" << full_address << "]\n";
 	return full_address;
 }

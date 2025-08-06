@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 15:36:07 by lchauffo          #+#    #+#             */
-/*   Updated: 2025/07/31 15:38:58 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/08/04 14:01:26 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -223,7 +223,7 @@ void	Server::checkPrivmsg(const std::vector<std::string> &priv, int client_fd)//
 		std::string client_nick = _clients[client_fd].getNickName();
 		std::string bot_msg = priv[2];
 		_bot->handleConversation(client_fd, bot_msg, client_nick, "", false);
-		return ;
+		// return ;
 	}
 	if (priv[1][0] == '#')
 	{
@@ -261,59 +261,61 @@ bool summonBot(const std::string &msg)//check the presence of one summon_express
 }
 
 #if BONUS
-// void	echoClientMessage(std::string &msg, const std::string &full_client_name, const std::string &target, int client_fd)
+// void	echoClientMessage(std::string &msg, const std::string &full_bot_name, const std::string &target, int client_fd)
 // {
 // 	std::string client_echo_msg;
 
+// 	std::cout << "*** inside ECHO ***\n";
 // 	if (msg.empty())
 // 		return ;
-// 	client_echo_msg = full_client_name + " PRIVMSG " + target + " " + msg + END;
+// 	std::cout << "full_bot_name = [" << full_bot_name << "] - target = [" << target << "]\n";
+// 	client_echo_msg = std::string(":") + full_bot_name + " PRIVMSG " + target + " " + msg + END;
 // 	std::cout << "Echoing client message: [" << client_echo_msg << "]" << std::endl;
 // 	send(client_fd, client_echo_msg.c_str(), client_echo_msg.size(), 0);
 // }
 
-void	Server::checkBot(const std::vector<std::string> &bot, int client_fd)//Lulu
-{
-	std::cout << "DEBUG: checkBot called with " << bot.size() << " parameters" << std::endl;
-	std::cout << "DEBUG: Bot active? " << _bot->isActive() << std::endl;
+// void	Server::checkBot(const std::vector<std::string> &bot, int client_fd)//Lulu
+// {
+// 	std::cout << "DEBUG: checkBot called with " << bot.size() << " parameters" << std::endl;
+// 	std::cout << "DEBUG: Bot active? " << _bot->isActive() << std::endl;
 
-	bool in_channel = false;
-	std::string channel_name = "";
-	std::string client_name = "";
-	std::string msg = "";
-	std::cout << "- before assignement\n";
-	if (bot.size() > 2)
-	{
-		std::cout << "-- if bot.size() > 2\n";
-		channel_name = bot[1];
-		msg = bot[2];
-	}
-	else if (bot.size() == 2)
-	{
-		std::cout << "-- if bot.size() == 2\n";
-		if (bot[1][0] == ':')
-			msg = bot[1];
-		else
-			channel_name = bot[1];
-	}
-	std::cout << "- after ifs\n";
-	std::cout << "- channel_name = [" << channel_name << "]\n";
-	std::cout << "- msg = [" << msg << "]\n";
+// 	bool in_channel = false;
+// 	std::string channel_name = "";
+// 	std::string client_name = "";
+// 	std::string msg = "";
+// 	std::cout << "- before assignement\n";
+// 	if (bot.size() > 2)
+// 	{
+// 		std::cout << "-- if bot.size() > 2\n";
+// 		channel_name = bot[1];
+// 		msg = bot[2];
+// 	}
+// 	else if (bot.size() == 2)
+// 	{
+// 		std::cout << "-- if bot.size() == 2\n";
+// 		if (bot[1][0] == ':')
+// 			msg = bot[1];
+// 		else
+// 			channel_name = bot[1];
+// 	}
+// 	std::cout << "- after ifs\n";
+// 	std::cout << "- channel_name = [" << channel_name << "]\n";
+// 	std::cout << "- msg = [" << msg << "]\n";
 	
-	std::map<int, Client>::iterator this_client = _clients.find(client_fd);
-	if (this_client != _clients.end())
-		client_name = this_client->second.getNickName();
-	std::cout << "- client_name = [" << client_name << "]\n";
-
-	// if (channel_name[0] == '#' || channel_name[0] == '&')
-	// 	echoClientMessage(msg, this_client->second.getFullAddress(), channel_name, client_fd);
-	// else
-	// 	echoClientMessage(msg, this_client->second.getFullAddress(), _bot->getNickName(), client_fd);
+// 	std::map<int, Client>::iterator this_client = _clients.find(client_fd);
+// 	if (this_client != _clients.end())
+// 		client_name = this_client->second.getNickName();
+// 	std::cout << "- client_name = [" << client_name << "]\n";
+// 	std::cout << "\n    L E T ' S   E C H O   \n\n";
+// 	if (channel_name[0] == '#' || channel_name[0] == '&')
+// 		echoClientMessage(msg, this_client->second.getFullAddress(), channel_name, client_fd);
+// 	else
+// 		echoClientMessage(msg, this_client->second.getFullAddress(), _bot->getNickName(), client_fd);
 	
-	_bot->handleConversation(client_fd, msg, client_name, channel_name, in_channel);
+// 	_bot->handleConversation(client_fd, msg, client_name, channel_name, in_channel);
 
-	std::cout << "end of function checkBot()\n";
-}
+// 	std::cout << "end of function checkBot()\n";
+// }
 
 void	Server::checkServer(const std::vector<std::string> &serv, int client_fd)
 {

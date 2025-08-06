@@ -6,7 +6,7 @@
 /*   By: lchauffo <lchauffo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/04 17:41:21 by morgane           #+#    #+#             */
-/*   Updated: 2025/07/29 15:09:34 by lchauffo         ###   ########.fr       */
+/*   Updated: 2025/08/04 18:52:46 by lchauffo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,11 @@
 #include "Utils.hpp"
 #include "Style.hpp"
 
-#define SPECIAL "[]\\`^{|}"
-#define ALPHANUMSPE "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]\\`^{|}-"
+#define ALPHA std::string("abcdefghijklmnopqrstuvwxyz")
+#define ALPHA_UP "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#define NUMBER "0123456789"
+#define SPECIAL std::string("[]\\`^{|}")
+#define ALPHANUMSPE ALPHA + ALPHA_UP + NUMBER + SPECIAL
 #define END "\r\n"
 
 class Channel;

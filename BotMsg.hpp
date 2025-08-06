@@ -3,13 +3,23 @@
 #define botKeyWordActivate1 "i see you have an interest on your future, divination and the big question: who are you"
 #define botKeyWordActivate2 "?\nmy generous self will give you some hints..."
 
+#define botCLientType "Are you talking from a terminal [1] or hexchat [2]?"
+
+#define botInstructionOr " or "
 #define botInstruction1 "Instruction : "
-#define botInstruction2 "[BOT]"
-#define botInstruction3 " or "
-#define botInstruction4 "[BOT :insert message here]"
-#define botInstruction5 ", for a private one-on-one conversation or "
-#define botInstruction6 "[BOT #channel_name_here :insert message here]"
-#define botInstruction7 ", to follow conversation in channel"
+#define botInstruction2 "for a private one-on-one conversation --> "
+#define botInstructTerm3 BOLD + "[BOT]" + RST
+#define botInstructTerm4 BOLD + "[BOT :your message]" + RST
+#define botInstrucXchat3 BOLD + "[/quote BOT]" + RST
+#define botInstrucXchat4 BOLD + "[/quote BOT :your message]" + RST
+#define botInstrucXchat5 BOLD + "[your message]" + RST
+#define botInstruction6 ", to follow conversation in channel --> "
+#define botInstructTerm7 BOLD + "[BOT #channel_name_here]" + RST
+#define botInstructTerm8 BOLD + "[BOT #channel_name_here :your message]" + RST
+#define botInstrucXchat7 BOLD + "[/quote BOT #channel_name_here]" + RST
+#define botInstrucXchat8 BOLD + "[/quote BOT #channel_name_here :your message]" + RST
+#define botInstrucXchat9 BOLD + "[BOT]" + RST
+#define botInstrucXchat10 BOLD + "[BOT :your message]" + RST
 
 #define botIllegal1 "Mind your manners, here no talk like that to me"
 #define botIllegal2 "I can't help you if no speak IRC to me"
@@ -20,39 +30,35 @@
 #define botChanNoAccess3 " illegally, not with me i don't have paper, no money"
 
 #define bot0Call1 " Who wakes me from my slumber ?...aaahh i see ya "
-#define bot0Call2 "ummm...there's a lot to tell"
-
+#define bot0Call2 " ummm...there's a lot to tell"
 #define bot1Call1 " Tell me "
 #define bot1Call2 ", do you wish to converse with me?"
-
 #define bot2Call1 " Play with me, "
 #define bot2Call2 " and i will tell you something interesting"
 
-#define botWarning0 "Warning : i may be discussing with some occult forces on the great web, \
+#define botWarning0 "Warning: i may be discussing with some occult forces on the great web, \
 but i promise to not spill any of your secrets, anything that tells about you, \
 everything stays anonymous of course"
+#define botWarning1 "Warning: all infos are stored locally and erased when the server is closed."
 
 #define botSummon "Call my name 3 times if you wish to dive in the cards ?"
 
 #define botAccept "This is me me me ⊂(灬ˊ🧿 🧿 🧿ˋ灬)⊃"
-
 #define botLogin1 "Talking about you "
-
 #define botLogin2 ", you seem to have a great attachment to numbers, i see 42...\
 if you can tell me more about you, first will you introduce me your login:"
 
-#define botWarning1 "Warning: all infos are stored locally and erased when the server is closed."
-
 #define botVerif ":bot bot bot"
-
 #define botVerifUp ":BOT BOT BOT"
-
 #define botNameVerif ":D-CODER D-CODER D-CODER"
 
 #define noBot "Who are you calling..."
 
 #define botIgnore "...mmm... it's true some secret are best being unsaid \
 or maybe you're not part of the sect... i mean school"
+
+#define botOAuth "The ethereal forces reveal... Your digital aura shows great potential! Let's dive into the cards"
+#define botNoAuth "The cosmic connection failed... The spirits are silent."
 
 #define botWait "..."
 

@@ -10,9 +10,11 @@
 #include "Connexion.hpp"
 #include "Server.hpp"
 #include "Style.hpp"
+#include "UserData.hpp"
 
 class Server;
 class Client;
+class UserData;
 
 class Bot : public Connexion
 {
@@ -24,15 +26,21 @@ class Bot : public Connexion
 
 		static const int BOT_FD = -1;
 		bool _isactive;
+		bool _ishexchat;
 
 		Server* _server; // Reference to server for accessing channels/clients
 		void loadOAuthConfig();
-		void refreshAccessToken();
+		std::string makeHttpsRequests(const std::string &url, const std::string &data, bool user_request);
+		bool refreshAccessToken();
+		bool parseReceivedToken(const std::string &token);
+		bool getUserInfo(int client_fd, const std::string &login);
+		bool parseJson(int client_fd, const std::string &token);
+
+		std::map <int, UserData> _user;
 	public:
 		Bot();
 		Bot(Server *server);
 		~Bot();
-
 
 		void createBotClient();
 		void joinChannel(const std::string &channel_name, bool &in_channel);
@@ -45,18 +53,19 @@ class Bot : public Connexion
 		// Bot conversation methods
 		void handleConversation(int client_fd, const std::string &msg,\
 		const std::string &client_nick, const std::string & channel_name, bool in_channel);
-		void echoClientMessage(std::string &msg, const std::string &full_client_name, int client_fd);
 
 		void stepIllegalCommand(const int &client_fd, const std::string &nick);
 		void stepUninvitedChannel(const int &client_fd, const std::string &nick, const std::string &illegal_channel);
-		void step0(const int &client_fd, const std::string &msg, const std::string &nick, \
+		const std::string stepInstructionMsg();
+		void step0(const int &client_fd, const std::string &msg, const std::string &nick);
+		void step1(const int &client_fd, const std::string &msg, const std::string &nick, \
 		const std::string &target, bool in_channel);
-		void step1(const int &client_fd, const std::string &nick, const std::string &target, \
-		bool in_channel);
 		void step2(const int &client_fd, const std::string &nick, const std::string &target, \
 		bool in_channel);
-		void step3(const int &client_fd, std::string msg, const std::string &nick, \
+		void step3(const int &client_fd, const std::string &nick, const std::string &target, \
+		bool in_channel);
+		void step4(const int &client_fd, std::string msg, const std::string &nick, \
 		const std::string &target, bool in_channel);
-		void step4(const int &client_fd, std::string login, const std::string &nick, \
-		const std::string &target, bool in_channel);
+		void step5(const int &client_fd, std::string login, const std::string &target, bool in_channel);
+		void step6(const int &client_fd, const std::string &target, bool in_channel);
 };

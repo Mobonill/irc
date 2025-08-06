@@ -15,7 +15,8 @@ SRC =	main.cpp \
 
 SRC_BONUS = ServerBot.cpp \
 	Bot.cpp \
-	BotMsg.cpp
+	BotMsg.cpp \
+	UserData.cpp
 
 OBJ = $(SRC:.cpp=.o)
 

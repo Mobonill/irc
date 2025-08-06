@@ -1,0 +1,17 @@
+# API CONFIGURATION
+.apiConfig
+*.config
+secrets/
+.env
+
+#TEMPORARY FILES
+*.tmp
+temp/
+api_responses/
+
+#BUILD ARTIFACTS
+*.o
+$(NAME)
+
+#VS CODE
+.vscode/

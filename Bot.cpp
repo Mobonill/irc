@@ -1,6 +1,6 @@
 #include "Bot.hpp"
 
-Bot::Bot() : _access_token(""), _isactive(false), _server(NULL)
+Bot::Bot() : _access_token(""), _isactive(false), _ishexchat(false), _server(NULL)
 {
 	_ip = "localghost2";
 	_nickname = "ጋ-ርዐጋቹዪ";
@@ -13,7 +13,7 @@ Bot::Bot() : _access_token(""), _isactive(false), _server(NULL)
 	loadOAuthConfig();
 }
 
-Bot::Bot(Server *server) : _access_token(""), _isactive(false), _server(server)
+Bot::Bot(Server *server) : _access_token(""), _isactive(false), _ishexchat(false), _server(server)
 {
 	_ip = "localghost";
 	_nickname = "ጋ-ርዐጋቹዪ";
@@ -68,45 +68,159 @@ size_t writeCallBack(void *contents, size_t size, size_t nmemb, void *data)
 
 // thx Joachim ISACKSON
 
-void Bot::refreshAccessToken()//call it again 
+bool	Bot::refreshAccessToken()
 {
+	std::string buffer;
+	std::string url = "https://api.intra.42.fr/oauth/token";
+
+	std::string data = "grant_type=client_credentials";
+	data += "&client_id=" + _client_id;
+	data += "&client_secret=" + _client_secret;
+	buffer = makeHttpsRequests(url, data, false);
+	return parseReceivedToken(buffer);
+}
+
+bool	Bot::getUserInfo(int client_fd, const std::string &login)
+{
+	if (_access_token.empty())
+		if (!refreshAccessToken())
+			return false;
+
+	std::string buffer;
+	std::string url = "https://api.intra.42.fr/v2/users?filter[login]=" + login;
+
+	std::string auth_header = "Authorization: Bearer " + _access_token;
+	buffer = makeHttpsRequests(url, auth_header, true);
+	std::cout << "User Info Response: [" << buffer << "]\n";
+	return parseJson(client_fd, buffer);
+}
+
+bool	Bot::parseJson(int client_fd, const std::string &token)
+{
+	std::map <std::string, std::string> json;
+	size_t begin = token.find("{");
+	if (begin == std::string::npos)
+		return false;
+	for (size_t i = begin + 1; i < token.size() || i < begin; i++)
+	{
+		std::cout << "i = " << i << std::endl;
+		size_t key_start = token.find("\"", i) + 1;
+		size_t key_end = token.find("\"", i + 1);
+		std::cout << "key_start = " << key_start << " - key_end = " << key_end << std::endl;
+		std::string key = token.substr(key_start, key_end - key_start);
+		std::cout << "key = [" << key << "]\n";
+		i = key_end + 1;
+		std::cout << "i = " << i << std::endl;
+		if (token[i] != ':')
+			break ;
+		size_t next_bracket = i + 1;
+		if (token[next_bracket] == '[')
+		{
+			size_t close_bracket = next_bracket + 1;
+			while (next_bracket != std::string::npos || next_bracket < close_bracket)
+			{
+				next_bracket = token.find("[", next_bracket + 1);
+				close_bracket = token.find("]", close_bracket + 1);
+			}
+			i = close_bracket + 1;
+			continue ;
+		}
+		if (token[i + 1] == '{')
+		{
+			size_t close_bracket = next_bracket + 1;
+			while (next_bracket != std::string::npos || next_bracket < close_bracket)
+			{
+				next_bracket = token.find("{", next_bracket + 1);
+				close_bracket = token.find("}", close_bracket + 1);
+			}
+			i = close_bracket + 1;
+			continue ;
+		}
+		size_t value_start = i + 1;
+		size_t value_end = token.find(",", i + 1);
+		std::cout << "value_start = " << value_start << " - value_end = " << value_end << std::endl;
+		std::string value = token.substr(value_start, value_end - value_start);
+		std::cout << "value = [" << value << "]\n";
+		json.insert(std::pair <std::string, std::string> (key, value));
+		i = value_end;
+		std::cout << "i = " << i << std::endl;
+		std::cout << "token_size = " << token.size() << std::endl;
+	}
+	std::cout << "DEBUG : out of for(token)\n";
+	if (json.empty())
+		return false;
+	std::cout << "DEBUG: printing parse json\n";
+	for (std::map <std::string, std::string>::iterator mit = json.begin(); mit != json.end(); ++mit)
+		std::cout << "key = [" << mit->first << "] - value = [" << mit->second << "]\n";
+	UserData new_user = UserData(json);
+	_user.insert(std::pair <int, UserData>(client_fd, new_user));
+	return true;
+}
+
+
+std::string Bot::makeHttpsRequests(const std::string &url, const std::string &data, bool is_user_request)
+{
+	std::string buffer = "";
 	CURL *curl = curl_easy_init();
 	if (!curl)
 	{
-		std::cerr << "no work" << std::endl;
-		return ;
+		std::cerr << "CURL initialization failed" << std::endl;
+		return buffer;
 	}
-	std::string buffer;
-	std::string dest = "https://api.intra.42.fr/oauth/token";
-	curl_easy_setopt(curl, CURLOPT_URL, dest.c_str());
-	std::string begin = "\"grant_type=client_credentials";
-	std::string uid = "&client_id=";
-	std::string secret = "&client_secret=";
-	std::string end = "\" ";
-	std::string data = begin + uid + _client_id + secret + _client_secret + end;
-	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
-
+	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallBack);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
 
-	CURLcode res = curl_easy_perform(curl);
-	if (res != CURLE_OK)
+	struct curl_slist *auth_header = NULL;
+	if (is_user_request)
 	{
-		std::cerr << "Error: no curl" << std::endl;
+		auth_header = curl_slist_append(auth_header, data.c_str());
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, auth_header);
 	}
 	else
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+	CURLcode res = curl_easy_perform(curl);
+	if (auth_header)
+		curl_slist_free_all(auth_header);
+	if (res != CURLE_OK)
 	{
-		_access_token = buffer;
-		std::cout << buffer << std::endl;//
+		std::cerr << "CURL request failed: " << curl_easy_strerror(res) << std::endl;
+		return buffer;
 	}
+	else
+		std::cout << "Raw API response: " << buffer << std::endl; // For debugging
 	curl_easy_cleanup(curl);
-	return ;
+	return buffer;
 }
 
-// void	Bot::getUserInfo()
-// {
+bool	Bot::parseReceivedToken(const std::string &token)
+{
+	std::string token_key = "\"access_token\":\"";
+	size_t token_pos = token.find(token_key);
+	if (token_pos == std::string::npos)
+	{
+		std::cerr << "❌ Failed to find access token\n";
+		return false;
+	}
+	token_pos += token_key.size();
+	size_t token_end = token.find('\"', token_pos);
+	if (token_end == std::string::npos)
+	{
+		std::cerr << "❌ Illegal access token\n";
+		return false;
+	}
+	token_end -= token_pos;
+	_access_token = token.substr(token_pos, token_end);
+	if (_access_token.empty())
+	{
+		std::cerr << "❌ Failed to extract access token\n";
+		return false;
+	}
+	std::cout << "✅ Access token extracted successfully!\n";
+	return true;
+}
 
-// }
+
 
 //co-signed by hdupire
 
@@ -118,6 +232,7 @@ void Bot::refreshAccessToken()//call it again
 	// opt = " -H ";
 	// std::string cmd2 = type + opt + auth + key + end + dest2 + login + close;
 
+	// curl -X POST --data "grant_type=client_credentials&client_id=MY_AWESOME_UID&client_secret=MY_AWESOME_SECRET" https://api.intra.42.fr/oauth/token
 
 /*----------------------------------------------------------------------------------*/
 
@@ -159,79 +274,64 @@ bool Bot::isActive() const { return _isactive; }
 
 int Bot::getBotFd() const { return BOT_FD; }
 
-void Bot::echoClientMessage(std::string &msg, const std::string &full_client_name, int client_fd)
-{
-	std::string client_echo_msg;
+// void Bot::echoClientMessage(std::string &msg, const std::string &full_client_name, int client_fd)
+// {
+// 	std::string client_echo_msg;
 
-	if (msg.empty())
-		return ;
-	client_echo_msg = full_client_name + " PRIVMSG " + _nickname + " " + msg + END;
-	std::cout << "Echoing client message: [" << client_echo_msg << "]" << std::endl;
-	send(client_fd, client_echo_msg.c_str(), client_echo_msg.size(), 0);
-}
+// 	if (msg.empty())
+// 		return ;
+// 	client_echo_msg = full_client_name + " PRIVMSG " + _nickname + " " + msg + END;
+// 	std::cout << "Echoing client message: [" << client_echo_msg << "]" << std::endl;
+// 	send(client_fd, client_echo_msg.c_str(), client_echo_msg.size(), 0);
+// }//:sender_nick!user@host PRIVMSG receiver_nick :message
 
 // Bot conversation methods
 void Bot::handleConversation(int client_fd, const std::string &msg,\
 const std::string &client_nick, const std::string & channel_name, bool in_channel)
 {
 	std::cout << "DEBUG: Bot::handleConversation" << std::endl;
-	std::cout << "- client_nick = [" << client_nick << "]\n";
 	std::string target = client_nick;
-	std::cout << "- target = [" << target << "]\n";
-	std::cout << "- client_fd = [" << client_fd << "]\n";
-	std::cout << "- _server = [" << _server << "]\n";
 	int step = _server->getClientBotStep(client_fd);
-	std::cout << "- step = [" << step << "]\n";
-	std::cout << "- before ifs\n";
 	if (!_server)
 		return ;
 	if (!_isactive)
 		createBotClient();
 	if (channel_name.empty())
-	{
-		std::cout << "-- no channel == don't care\n";
 		in_channel = false;
-	}
 	else if (channel_name[0] == '#' || channel_name[0] == '&')
 	{
-		std::cout << "-- looks like a channel\n";
 		if (_server->addBotToChannel(channel_name, client_fd, in_channel) == false)
 		{
-			std::cout << "--- illegal channel interaction\n";
 			step = INT_MAX;
 			in_channel = false;
 		}
-		std::cout << "-- it's a channel\n";
 	}
-	else
+	else if (!(step == 0 || step == 1))
 	{
-		std::cout << "-- illegal args\n";
 		step = INT_MAX;
 		in_channel = false;
 	}
-	if (!msg.empty() && msg[0] != ':')
-	{
-		std::cout << "-- illegal msg format\n";
+	if (step != 0 && step != 1 && !msg.empty() && msg[0] != ':')
 		step = INT_MAX;
-	}
 	if (in_channel)
 		target = channel_name;
-	std::cout << "- after ifs\n";
-	std::cout << "- target = [" << target << "]\n";
-	std::cout << "- step = [" << step << "]\n";
 	if (step == INT_MAX)
 		stepIllegalCommand(client_fd, client_nick);
 	else if (step < 0)
 		stepUninvitedChannel(client_fd, client_nick, channel_name);
 	else if (step == 0)
-		step0(client_fd, msg, client_nick, target, in_channel);
+		step0(client_fd, msg, client_nick);
 	else if (step == 1)
-		step1(client_fd, client_nick, target, in_channel);
-	if (step == 2)
+		step1(client_fd, msg, client_nick, target, in_channel);
+	else if (step == 2)
 		step2(client_fd, client_nick, target, in_channel);
-	else if (step == 3)
-		step3(client_fd, msg, client_nick, target, in_channel);
+	if (step == 3)
+		step3(client_fd, client_nick, target, in_channel);
 	else if (step == 4)
 		step4(client_fd, msg, client_nick, target, in_channel);
-	std::cout << "end of function checkBot()\n";
+	else if (step == 5)
+		step5(client_fd, msg, target, in_channel);
+	if (step == 6)
+		step6(client_fd, target, in_channel);
+	std::cout << "DEBUG: end of function checkBot()\n";
 }

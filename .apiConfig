@@ -1,3 +1,3 @@
 clientId=u-s4t2ud-51b8ea7f1b5b6d799ee3947904da14f8b15b7fad5c59b5b2d85acf43d5858262
-clientSecret=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
+clientSecret=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
 redirectURI=https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-51b8ea7f1b5b6d799ee3947904da14f8b15b7fad5c59b5b2d85acf43d5858262&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob&response_type=code
